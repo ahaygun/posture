@@ -29,7 +29,7 @@
   .panel-label::after { content:''; flex:1; height:1px; background:var(--border); }
   .spine-panel { grid-column:1; grid-row:1; display:flex; flex-direction:column; }
   .figure-wrap { display:flex; gap:16px; align-items:flex-start; }
-  .svg-area { flex:0 0 260px; min-height:300px; }
+  .svg-area { flex:0 0 280px; min-height:300px; }
   .controls-area { flex:1; display:flex; flex-direction:column; gap:16px; }
   .angle-display { font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; line-height:1; transition:color .3s; }
   .angle-unit { font-size:1rem; color:var(--text-dim); margin-left:3px; }
@@ -155,41 +155,80 @@
     <div class="panel-label" data-i18n="panelProfile">Yan Profil — Durus Simülasyonu</div>
     <div class="figure-wrap">
       <div class="svg-area">
-        <svg width="260" height="300" viewBox="0 0 260 300" preserveAspectRatio="xMidYMid meet">
+        <svg width="280" height="300" viewBox="0 0 280 300" preserveAspectRatio="xMidYMid meet">
           <defs>
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
               <path d="M20 0L0 0 0 20" fill="none" stroke="#1e2128" stroke-width="0.5"/>
             </pattern>
           </defs>
-          <rect width="260" height="300" fill="url(#grid)" opacity="0.6"/>
-          <line x1="105" y1="10" x2="105" y2="290" stroke="#1e2128" stroke-width="1" stroke-dasharray="5,5"/>
-          <text x="108" y="22" fill="#3a4155" font-size="8" font-family="Space Mono">PLUMB</text>
-          <!-- Chair -->
-          <rect x="60" y="220" width="110" height="8" rx="3" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
-          <rect x="155" y="150" width="8" height="75" rx="3" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
-          <line x1="70" y1="228" x2="65" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
-          <line x1="160" y1="228" x2="165" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
-          <line x1="30" y1="270" x2="230" y2="270" stroke="#1e2128" stroke-width="1.5"/>
+          <rect width="280" height="300" fill="url(#grid)" opacity="0.6"/>
+          <line x1="85" y1="10" x2="85" y2="290" stroke="#1e2128" stroke-width="1" stroke-dasharray="5,5"/>
+          <text x="88" y="22" fill="#3a4155" font-size="8" font-family="Space Mono">PLUMB</text>
+          <!-- Ground -->
+          <line x1="10" y1="272" x2="270" y2="272" stroke="#1e2128" stroke-width="1.5"/>
+          <!-- Desk -->
+          <rect x="155" y="182" width="90" height="6" rx="2" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
+          <line x1="165" y1="188" x2="165" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <line x1="235" y1="188" x2="235" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <!-- Monitor -->
+          <rect x="183" y="120" width="48" height="36" rx="3" fill="#0d1017" stroke="#2a2f3d" stroke-width="1.5"/>
+          <rect x="186" y="123" width="42" height="30" rx="1" fill="#141822" stroke="#1e2128" stroke-width="0.5"/>
+          <line x1="207" y1="156" x2="207" y2="168" stroke="#2a2f3d" stroke-width="2"/>
+          <rect x="197" y="168" width="20" height="3" rx="1" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1"/>
+          <!-- Monitor stand base on desk -->
+          <rect x="193" y="171" width="28" height="11" rx="2" fill="#1a1d24" stroke="#2a2f3d" stroke-width="0.8"/>
+          <!-- Keyboard on desk -->
+          <rect x="170" y="176" width="22" height="5" rx="1.5" fill="#1a1d24" stroke="#2a2f3d" stroke-width="0.8"/>
+          <!-- Office Chair -->
+          <!-- Seat cushion -->
+          <rect x="55" y="218" width="75" height="8" rx="4" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
+          <!-- Backrest (behind person, on left) -->
+          <path d="M58,218 Q48,190 52,148" fill="none" stroke="#2a2f3d" stroke-width="5" stroke-linecap="round"/>
+          <path d="M58,218 Q48,190 52,148" fill="none" stroke="#1a1d24" stroke-width="3" stroke-linecap="round"/>
+          <!-- Chair cylinder -->
+          <line x1="92" y1="226" x2="92" y2="252" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <!-- Chair base (5-star) -->
+          <line x1="68" y1="270" x2="92" y2="252" stroke="#2a2f3d" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="116" y1="270" x2="92" y2="252" stroke="#2a2f3d" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Casters -->
+          <circle cx="68" cy="271" r="3" fill="#2a2f3d"/>
+          <circle cx="116" cy="271" r="3" fill="#2a2f3d"/>
           <!-- Person -->
           <g id="person-group">
-            <ellipse cx="105" cy="218" rx="16" ry="9" fill="#22263a" stroke="#4a5160" stroke-width="1.5"/>
-            <line id="thigh" x1="105" y1="218" x2="160" y2="218" stroke="#4a5160" stroke-width="5" stroke-linecap="round"/>
-            <line x1="160" y1="218" x2="160" y2="268" stroke="#4a5160" stroke-width="4" stroke-linecap="round"/>
-            <line x1="160" y1="268" x2="185" y2="268" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
-            <path id="spine-path" d="M105,218 Q105,160 105,110" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
-            <ellipse cx="105" cy="218" rx="6" ry="6" fill="#00e5a0" opacity="0.8"/>
-            <circle id="shoulder" cx="105" cy="110" r="5" fill="#4a5160"/>
-            <line id="upper-arm" x1="105" y1="110" x2="120" y2="148" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
-            <line id="forearm" x1="120" y1="148" x2="145" y2="148" stroke="#4a5160" stroke-width="2.5" stroke-linecap="round"/>
-            <line id="neck" x1="105" y1="110" x2="105" y2="92" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
-            <circle id="head" cx="105" cy="80" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5" style="cursor:grab;"/>
-            <circle id="head-hitarea" cx="105" cy="80" r="26" fill="transparent" style="cursor:grab;"/>
-            <line id="nose" x1="107" y1="78" x2="120" y2="84" stroke="#4a5160" stroke-width="1.5" stroke-linecap="round"/>
-            <circle id="eye" cx="112" cy="75" r="2" fill="#4a5160"/>
+            <!-- Hip/pelvis -->
+            <ellipse cx="85" cy="216" rx="14" ry="8" fill="#22263a" stroke="#4a5160" stroke-width="1.5"/>
+            <!-- Thigh -->
+            <line id="thigh" x1="85" y1="216" x2="140" y2="220" stroke="#4a5160" stroke-width="5" stroke-linecap="round"/>
+            <!-- Lower leg -->
+            <line x1="140" y1="220" x2="145" y2="268" stroke="#4a5160" stroke-width="4" stroke-linecap="round"/>
+            <!-- Foot -->
+            <line x1="145" y1="268" x2="162" y2="268" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <!-- Spine (dynamic) -->
+            <path id="spine-path" d="M85,216 Q85,160 85,108" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
+            <!-- Hip marker -->
+            <ellipse cx="85" cy="216" rx="5" ry="5" fill="#00e5a0" opacity="0.8"/>
+            <!-- Shoulder -->
+            <circle id="shoulder" cx="85" cy="108" r="5" fill="#4a5160"/>
+            <!-- Upper arm -->
+            <line id="upper-arm" x1="85" y1="108" x2="105" y2="150" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <!-- Forearm (reaches to desk/keyboard) -->
+            <line id="forearm" x1="105" y1="150" x2="160" y2="180" stroke="#4a5160" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Hand -->
+            <circle id="hand" cx="160" cy="180" r="3" fill="#4a5160"/>
+            <!-- Neck -->
+            <line id="neck" x1="85" y1="108" x2="85" y2="90" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <!-- Head -->
+            <circle id="head" cx="85" cy="76" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5" style="cursor:grab;"/>
+            <circle id="head-hitarea" cx="85" cy="76" r="26" fill="transparent" style="cursor:grab;"/>
+            <!-- Face -->
+            <line id="nose" x1="87" y1="74" x2="100" y2="80" stroke="#4a5160" stroke-width="1.5" stroke-linecap="round"/>
+            <circle id="eye" cx="92" cy="71" r="2" fill="#4a5160"/>
+            <!-- Angle arc -->
             <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
-            <text id="angle-arc-label" x="80" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
+            <text id="angle-arc-label" x="60" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
           </g>
-          <g id="sensor-marker" transform="translate(105,148)">
+          <!-- Sensor marker on spine -->
+          <g id="sensor-marker" transform="translate(85,148)">
             <rect x="-8" y="-5" width="16" height="10" rx="2" fill="none" stroke="#4f8eff" stroke-width="1" stroke-dasharray="2,2"/>
             <text x="10" y="4" fill="#4f8eff" font-size="7" font-family="Space Mono">MPU</text>
           </g>
@@ -530,7 +569,7 @@ function showToast(msg){
 
 function updateFigure(angleDeg){
   const rad=angleDeg*Math.PI/180;
-  const spineLen=108,neckLen=18,hx=105,hy=218;
+  const spineLen=108,neckLen=18,hx=85,hy=216;
   const sx=hx+Math.sin(rad)*spineLen;
   const sy=hy-Math.cos(rad)*spineLen;
   const nx=sx+Math.sin(rad)*neckLen;
@@ -550,11 +589,17 @@ function updateFigure(angleDeg){
   noseEl.setAttribute('x1',hcx+2); noseEl.setAttribute('y1',hcy+2);
   noseEl.setAttribute('x2',hcx+13); noseEl.setAttribute('y2',hcy+6);
   eyeEl.setAttribute('cx',hcx+7); eyeEl.setAttribute('cy',hcy-3);
-  const ax2=sx+12+Math.sin(rad)*8,ay2=sy+36;
+  // Arms: upper arm from shoulder toward desk, forearm reaches keyboard area
+  const elbowX=sx+20,elbowY=sy+38;
   upperArmEl.setAttribute('x1',sx); upperArmEl.setAttribute('y1',sy);
-  upperArmEl.setAttribute('x2',ax2); upperArmEl.setAttribute('y2',ay2);
-  forearmEl.setAttribute('x1',ax2); forearmEl.setAttribute('y1',ay2);
-  forearmEl.setAttribute('x2',ax2+28); forearmEl.setAttribute('y2',ay2);
+  upperArmEl.setAttribute('x2',elbowX); upperArmEl.setAttribute('y2',elbowY);
+  // Forearm reaches toward desk surface (keyboard at ~x=175, y=180)
+  const handX=160+Math.sin(rad)*5,handY=180;
+  forearmEl.setAttribute('x1',elbowX); forearmEl.setAttribute('y1',elbowY);
+  forearmEl.setAttribute('x2',handX); forearmEl.setAttribute('y2',handY);
+  // Hand dot
+  const handEl=document.getElementById('hand');
+  if(handEl){handEl.setAttribute('cx',handX);handEl.setAttribute('cy',handY);}
 
   spinePath.style.stroke=angleDeg>=40?'#ff3b4e':angleDeg>=20?'#f5c518':'#00e5a0';
   spinePath.style.strokeWidth=angleDeg>=40?'5':'4';
@@ -840,7 +885,7 @@ document.addEventListener('keydown',(e)=>{
 // Head drag interaction
 const svgEl=document.querySelector('.svg-area svg');
 const headHit=document.getElementById('head-hitarea');
-const hipX=105,hipY=218;
+const hipX=85,hipY=216;
 let dragging=false;
 
 function getSVGPoint(e){
