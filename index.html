@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostureGuard — Wearable Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Syne:wght@400;600;700;800&display=swap');
+  :root {
+    --bg: #0a0c10; --panel: #111318; --border: #1e2128;
+    --good: #00e5a0; --warn: #f5c518; --bad: #ff3b4e;
+    --neutral: #4a5160; --text: #e8eaf0; --text-dim: #6b7280; --accent: #4f8eff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Space Mono',monospace; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; }
+  header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; background:rgba(10,12,16,0.95); position:sticky; top:0; z-index:100; }
+  .logo-dot { width:9px; height:9px; border-radius:50%; background:var(--good); box-shadow:0 0 10px var(--good); animation:pdot 2s ease-in-out infinite; }
+  @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+  .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; letter-spacing:.05em; }
+  .logo-text span { color:var(--good); }
+  .header-badge { margin-left:auto; font-size:.6rem; color:var(--text-dim); border:1px solid var(--border); padding:3px 10px; border-radius:20px; letter-spacing:.08em; }
+  main { display:grid; grid-template-columns:1fr 300px; grid-template-rows:auto auto auto; gap:14px; padding:20px 28px; flex:1; max-width:1080px; margin:0 auto; width:100%; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .panel-label { font-size:.58rem; letter-spacing:.14em; color:var(--text-dim); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .panel-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .spine-panel { grid-column:1; grid-row:1; display:flex; flex-direction:column; }
+  .figure-wrap { display:flex; gap:16px; align-items:flex-start; }
+  .svg-area { flex:0 0 260px; }
+  .controls-area { flex:1; display:flex; flex-direction:column; gap:16px; }
+  .angle-display { font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; line-height:1; transition:color .3s; }
+  .angle-unit { font-size:1rem; color:var(--text-dim); margin-left:3px; }
+  .posture-label { font-size:.72rem; letter-spacing:.1em; font-weight:700; margin-top:6px; transition:color .3s; }
+  input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:3px; background:linear-gradient(to right,var(--good) 0%,var(--warn) 33%,var(--bad) 66%); outline:none; cursor:pointer; margin-top:18px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px var(--accent),0 3px 10px rgba(0,0,0,.5); cursor:grab; transition:transform .1s; }
+  input[type=range]:active::-webkit-slider-thumb { transform:scale(1.15); cursor:grabbing; }
+  .slider-labels { display:flex; justify-content:space-between; font-size:.58rem; color:var(--text-dim); margin-top:6px; }
+  .angle-guide { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .guide-row { display:flex; align-items:center; gap:8px; font-size:.6rem; color:var(--text-dim); }
+  .guide-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .controls-row { display:flex; gap:8px; margin-top:auto; }
+  .btn { font-family:'Space Mono',monospace; font-size:.62rem; font-weight:700; letter-spacing:.07em; padding:9px 18px; border-radius:8px; border:1px solid var(--border); cursor:pointer; transition:all .2s; text-transform:uppercase; }
+  .btn-primary { background:var(--good); color:#0a0c10; border-color:var(--good); }
+  .btn-primary:hover { opacity:.85; }
+  .btn-primary.running { background:var(--bad); border-color:var(--bad); color:#fff; }
+  .btn-ghost { background:transparent; color:var(--text-dim); }
+  .btn-ghost:hover { border-color:var(--text-dim); color:var(--text); }
+  #beep-btn { margin-left:auto; display:flex; align-items:center; gap:5px; font-size:.58rem; color:var(--text-dim); cursor:pointer; user-select:none; border:1px solid var(--border); border-radius:20px; padding:7px 12px; }
+  #beep-btn .dot { width:7px; height:7px; border-radius:50%; background:var(--neutral); transition:background .2s; }
+  #beep-btn.on .dot { background:var(--good); box-shadow:0 0 7px var(--good); }
+  .status-panel { grid-column:2; grid-row:1/3; display:flex; flex-direction:column; gap:14px; }
+  .status-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; }
+  .status-indicator { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .status-circle { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; transition:all .4s; border:2px solid transparent; }
+  .status-circle.good { background:rgba(0,229,160,.12); border-color:var(--good); box-shadow:0 0 18px rgba(0,229,160,.3); }
+  .status-circle.warn { background:rgba(245,197,24,.12); border-color:var(--warn); box-shadow:0 0 18px rgba(245,197,24,.3); }
+  .status-circle.bad { background:rgba(255,59,78,.12); border-color:var(--bad); box-shadow:0 0 18px rgba(255,59,78,.3); animation:pbad 1s ease-in-out infinite; }
+  @keyframes pbad { 0%,100%{box-shadow:0 0 18px rgba(255,59,78,.3)} 50%{box-shadow:0 0 32px rgba(255,59,78,.6)} }
+  .status-info h3 { font-family:'Syne',sans-serif; font-size:.95rem; font-weight:700; }
+  .status-info p { font-size:.6rem; color:var(--text-dim); margin-top:2px; }
+  .timer-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-top:1px solid var(--border); }
+  .timer-label { font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; }
+  .timer-value { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:700; color:var(--bad); font-variant-numeric:tabular-nums; }
+  .timer-value.inactive { color:var(--neutral); }
+  .bad-progress { height:4px; background:var(--border); border-radius:2px; margin-top:8px; overflow:hidden; }
+  .bad-progress-fill { height:100%; border-radius:2px; background:var(--bad); transition:width .2s linear; box-shadow:0 0 7px var(--bad); }
+  .history-panel { grid-column:1; grid-row:2; }
+  .history-track { display:flex; gap:2px; height:28px; align-items:stretch; border-radius:4px; overflow:hidden; margin-top:8px; }
+  .history-seg { flex:1; border-radius:2px; min-width:3px; }
+  .analytics-panel { grid-column:1/3; grid-row:3; }
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .stat-card { background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:10px; padding:14px; position:relative; overflow:hidden; }
+  .stat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+  .stat-card.c-total::before { background:var(--accent); }
+  .stat-card.c-good::before { background:var(--good); }
+  .stat-card.c-bad::before { background:var(--bad); }
+  .stat-card.c-pct::before { background:var(--warn); }
+  .stat-label { font-size:.55rem; color:var(--text-dim); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .stat-value { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .stat-card.c-total .stat-value { color:var(--accent); }
+  .stat-card.c-good .stat-value { color:var(--good); }
+  .stat-card.c-bad .stat-value { color:var(--bad); }
+  .stat-card.c-pct .stat-value { color:var(--warn); }
+  #alert-overlay { position:fixed; inset:0; background:rgba(255,59,78,.08); border:3px solid var(--bad); z-index:200; display:none; align-items:center; justify-content:center; animation:fbg .5s ease-in-out infinite; }
+  #alert-overlay.active { display:flex; }
+  @keyframes fbg { 0%,100%{background:rgba(255,59,78,.06)} 50%{background:rgba(255,59,78,.16)} }
+  .alert-box { background:#1a0b0e; border:2px solid var(--bad); border-radius:16px; padding:36px 44px; text-align:center; box-shadow:0 0 55px rgba(255,59,78,.4); animation:aslide .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes aslide { from{transform:scale(.8) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+  .alert-icon { font-size:2.8rem; margin-bottom:10px; animation:shake .5s ease-in-out infinite; }
+  @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
+  .alert-box h2 { font-family:'Syne',sans-serif; font-size:1.4rem; color:var(--bad); margin-bottom:6px; }
+  .alert-box p { color:var(--text-dim); font-size:.72rem; margin-bottom:20px; }
+  .alert-dismiss { background:var(--bad); color:#fff; border:none; padding:11px 28px; border-radius:8px; font-family:'Space Mono',monospace; font-size:.72rem; font-weight:700; cursor:pointer; }
+  body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:999; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot" id="live-dot"></div>
+  <div class="logo-text">Posture<span>Guard</span></div>
+  <div class="header-badge">SIM v1.0 — MPU6050 EMULATOR</div>
+</header>
+
+<main>
+  <div class="panel spine-panel">
+    <div class="panel-label">Side Profile — Posture Simulation</div>
+    <div class="figure-wrap">
+      <div class="svg-area">
+        <svg width="260" height="300" viewBox="0 0 260 300">
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0L0 0 0 20" fill="none" stroke="#1e2128" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="260" height="300" fill="url(#grid)" opacity="0.6"/>
+          <line x1="105" y1="10" x2="105" y2="290" stroke="#1e2128" stroke-width="1" stroke-dasharray="5,5"/>
+          <text x="108" y="22" fill="#3a4155" font-size="8" font-family="Space Mono">PLUMB</text>
+          <!-- Chair -->
+          <rect x="60" y="220" width="110" height="8" rx="3" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
+          <rect x="155" y="150" width="8" height="75" rx="3" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
+          <line x1="70" y1="228" x2="65" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <line x1="160" y1="228" x2="165" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="270" x2="230" y2="270" stroke="#1e2128" stroke-width="1.5"/>
+          <!-- Person -->
+          <g id="person-group">
+            <ellipse cx="105" cy="218" rx="16" ry="9" fill="#22263a" stroke="#4a5160" stroke-width="1.5"/>
+            <line id="thigh" x1="105" y1="218" x2="160" y2="218" stroke="#4a5160" stroke-width="5" stroke-linecap="round"/>
+            <line x1="160" y1="218" x2="160" y2="268" stroke="#4a5160" stroke-width="4" stroke-linecap="round"/>
+            <line x1="160" y1="268" x2="185" y2="268" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <path id="spine-path" d="M105,218 Q105,160 105,110" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
+            <ellipse cx="105" cy="218" rx="6" ry="6" fill="#00e5a0" opacity="0.8"/>
+            <circle id="shoulder" cx="105" cy="110" r="5" fill="#4a5160"/>
+            <line id="upper-arm" x1="105" y1="110" x2="120" y2="148" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <line id="forearm" x1="120" y1="148" x2="145" y2="148" stroke="#4a5160" stroke-width="2.5" stroke-linecap="round"/>
+            <line id="neck" x1="105" y1="110" x2="105" y2="92" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <circle id="head" cx="105" cy="80" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5"/>
+            <line id="nose" x1="107" y1="78" x2="120" y2="84" stroke="#4a5160" stroke-width="1.5" stroke-linecap="round"/>
+            <circle id="eye" cx="112" cy="75" r="2" fill="#4a5160"/>
+            <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
+            <text id="angle-arc-label" x="80" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
+          </g>
+          <g id="sensor-marker" transform="translate(105,148)">
+            <rect x="-8" y="-5" width="16" height="10" rx="2" fill="none" stroke="#4f8eff" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="10" y="4" fill="#4f8eff" font-size="7" font-family="Space Mono">MPU</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="controls-area">
+        <div>
+          <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.12em; margin-bottom:6px;">TRUNK LEAN ANGLE</div>
+          <div class="angle-display" id="angle-display">0<span class="angle-unit">°</span></div>
+          <div class="posture-label" id="posture-label" style="color:var(--good)">✓ IDEAL POSTURE</div>
+        </div>
+        <div>
+          <input type="range" id="angle-slider" min="0" max="60" value="0" step="1">
+          <div class="slider-labels">
+            <span>0° Ideal</span><span>20° Warn</span><span>40°+ Bad</span>
+          </div>
+        </div>
+        <div class="angle-guide">
+          <div class="guide-row"><div class="guide-dot" style="background:var(--good)"></div><span>0° – 20° → Upright, healthy spine</span></div>
+          <div class="guide-row"><div class="guide-dot" style="background:var(--warn)"></div><span>20° – 40° → Slight forward lean</span></div>
+          <div class="guide-row"><div class="guide-dot" style="background:var(--bad)"></div><span>40°+ → Slouched, spine stressed</span></div>
+        </div>
+        <div class="controls-row">
+          <button class="btn btn-primary" id="session-btn">▶ Start</button>
+          <button class="btn btn-ghost" id="reset-btn">↺ Reset</button>
+          <div id="beep-btn"><div class="dot"></div><span>Sound</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-panel">
+    <div class="status-card">
+      <div class="panel-label">Posture Status</div>
+      <div class="status-indicator">
+        <div class="status-circle good" id="status-circle">🧍</div>
+        <div class="status-info">
+          <h3 id="status-title" style="color:var(--good)">Good Posture</h3>
+          <p id="status-desc">Spine aligned correctly</p>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; margin-bottom:5px;">BAD POSTURE TIMER</div>
+        <div class="timer-value inactive" id="bad-timer">0s</div>
+        <div style="font-size:.56rem; color:var(--text-dim); margin:4px 0 7px;">Alert threshold: 10s</div>
+        <div class="bad-progress"><div class="bad-progress-fill" id="bad-progress-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="panel-label">Session Timer</div>
+      <div class="timer-row">
+        <span class="timer-label">ELAPSED</span>
+        <span class="timer-value inactive" id="session-timer">00:00</span>
+      </div>
+      <div class="timer-row">
+        <span class="timer-label">STATUS</span>
+        <span style="font-size:.62rem; color:var(--neutral);" id="session-status-text">IDLE</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="panel-label">Alert Log</div>
+      <div id="alert-log" style="max-height:110px; overflow-y:auto; font-size:.6rem; color:var(--text-dim); line-height:1.9;">
+        <div style="color:var(--neutral); font-style:italic;">No alerts yet...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel history-panel">
+    <div class="panel-label">Posture History — Last 60s</div>
+    <div class="history-track" id="history-track"></div>
+    <div style="display:flex; gap:18px; margin-top:9px; font-size:.56rem; color:var(--text-dim);">
+      <span><span style="color:var(--good)">■</span> Good (0°–20°)</span>
+      <span><span style="color:var(--warn)">■</span> Warning (20°–40°)</span>
+      <span><span style="color:var(--bad)">■</span> Bad (40°+)</span>
+    </div>
+  </div>
+
+  <div class="panel analytics-panel">
+    <div class="panel-label">Session Analytics</div>
+    <div class="stats-grid">
+      <div class="stat-card c-total"><div class="stat-label">Total Session</div><div class="stat-value" id="stat-total">0:00</div></div>
+      <div class="stat-card c-good"><div class="stat-label">Good Posture</div><div class="stat-value" id="stat-good">0:00</div></div>
+      <div class="stat-card c-bad"><div class="stat-label">Bad Posture</div><div class="stat-value" id="stat-bad">0:00</div></div>
+      <div class="stat-card c-pct"><div class="stat-label">Posture Score</div><div class="stat-value" id="stat-pct">—</div></div>
+    </div>
+  </div>
+</main>
+
+<div id="alert-overlay">
+  <div class="alert-box">
+    <div class="alert-icon">⚠️</div>
+    <h2>Poor Posture Alert!</h2>
+    <p>You've been slouched for over 10 seconds.<br>Sit upright and align your spine.</p>
+    <button class="alert-dismiss" id="alert-dismiss-btn">DISMISS</button>
+  </div>
+</div>
+
+<script>
+let sessionRunning=false,sessionSeconds=0,badPostureSeconds=0;
+let totalGoodSeconds=0,totalBadSeconds=0;
+let alertShown=false,alertCount=0,soundEnabled=false;
+let historyData=[],intervalId=null,audioCtx=null;
+
+const slider=document.getElementById('angle-slider');
+const angleDisplay=document.getElementById('angle-display');
+const postureLabel=document.getElementById('posture-label');
+const statusCircle=document.getElementById('status-circle');
+const statusTitle=document.getElementById('status-title');
+const statusDesc=document.getElementById('status-desc');
+const badTimer=document.getElementById('bad-timer');
+const badProgressFill=document.getElementById('bad-progress-fill');
+const sessionTimer=document.getElementById('session-timer');
+const sessionBtn=document.getElementById('session-btn');
+const resetBtn=document.getElementById('reset-btn');
+const alertOverlay=document.getElementById('alert-overlay');
+const alertDismissBtn=document.getElementById('alert-dismiss-btn');
+const beepBtn=document.getElementById('beep-btn');
+const historyTrack=document.getElementById('history-track');
+const alertLog=document.getElementById('alert-log');
+const liveDot=document.getElementById('live-dot');
+const spinePath=document.getElementById('spine-path');
+const headEl=document.getElementById('head');
+const noseEl=document.getElementById('nose');
+const eyeEl=document.getElementById('eye');
+const neckEl=document.getElementById('neck');
+const shoulderEl=document.getElementById('shoulder');
+const upperArmEl=document.getElementById('upper-arm');
+const forearmEl=document.getElementById('forearm');
+const angleArc=document.getElementById('angle-arc');
+const angleArcLabel=document.getElementById('angle-arc-label');
+const sensorMarker=document.getElementById('sensor-marker');
+
+function updateFigure(angleDeg){
+  const rad=angleDeg*Math.PI/180;
+  const spineLen=108,neckLen=18,hx=105,hy=218;
+  const sx=hx+Math.sin(rad)*spineLen;
+  const sy=hy-Math.cos(rad)*spineLen;
+  const nx=sx+Math.sin(rad)*neckLen;
+  const ny=sy-Math.cos(rad)*neckLen;
+  const hcx=nx+Math.sin(rad)*4;
+  const hcy=ny-8;
+  const cpx=hx+Math.sin(rad)*spineLen*0.3-Math.cos(rad)*8;
+  const cpy=hy-Math.cos(rad)*spineLen*0.5;
+
+  spinePath.setAttribute('d',`M${hx},${hy} Q${cpx},${cpy} ${sx},${sy}`);
+  shoulderEl.setAttribute('cx',sx); shoulderEl.setAttribute('cy',sy);
+  neckEl.setAttribute('x1',sx); neckEl.setAttribute('y1',sy);
+  neckEl.setAttribute('x2',nx); neckEl.setAttribute('y2',ny);
+  headEl.setAttribute('cx',hcx); headEl.setAttribute('cy',hcy);
+  noseEl.setAttribute('x1',hcx+2); noseEl.setAttribute('y1',hcy+2);
+  noseEl.setAttribute('x2',hcx+13); noseEl.setAttribute('y2',hcy+6);
+  eyeEl.setAttribute('cx',hcx+7); eyeEl.setAttribute('cy',hcy-3);
+  const ax2=sx+12+Math.sin(rad)*8,ay2=sy+36;
+  upperArmEl.setAttribute('x1',sx); upperArmEl.setAttribute('y1',sy);
+  upperArmEl.setAttribute('x2',ax2); upperArmEl.setAttribute('y2',ay2);
+  forearmEl.setAttribute('x1',ax2); forearmEl.setAttribute('y1',ay2);
+  forearmEl.setAttribute('x2',ax2+28); forearmEl.setAttribute('y2',ay2);
+
+  spinePath.style.stroke=angleDeg>=40?'#ff3b4e':angleDeg>=20?'#f5c518':'#00e5a0';
+  spinePath.style.strokeWidth=angleDeg>=40?'5':'4';
+
+  if(angleDeg>2){
+    const arcR=38;
+    const endX=hx+Math.sin(rad)*arcR,endY=hy-Math.cos(rad)*arcR;
+    angleArc.setAttribute('d',`M${hx},${hy-arcR} A${arcR},${arcR} 0 0,1 ${endX},${endY} L${hx},${hy} Z`);
+    angleArc.style.opacity='1';
+    angleArcLabel.setAttribute('x',hx-32); angleArcLabel.setAttribute('y',hy-arcR/2);
+    angleArcLabel.textContent=angleDeg+'°'; angleArcLabel.style.opacity='1';
+  } else {
+    angleArc.style.opacity='0'; angleArcLabel.style.opacity='0';
+  }
+  const msx=hx+Math.sin(rad)*spineLen*0.55;
+  const msy=hy-Math.cos(rad)*spineLen*0.55;
+  sensorMarker.setAttribute('transform',`translate(${msx},${msy}) rotate(${angleDeg})`);
+}
+
+function getStatus(a){ return a<20?'good':a<40?'warn':'bad'; }
+
+function updateUI(angle){
+  const st=getStatus(angle);
+  const col=st==='good'?'var(--good)':st==='warn'?'var(--warn)':'var(--bad)';
+  angleDisplay.innerHTML=angle+'<span class="angle-unit">°</span>';
+  angleDisplay.style.color=col;
+  statusCircle.className='status-circle '+st;
+  if(st==='good'){
+    postureLabel.textContent='✓ IDEAL POSTURE'; postureLabel.style.color='var(--good)';
+    statusCircle.textContent='🧍'; statusTitle.textContent='Good Posture'; statusTitle.style.color='var(--good)';
+    statusDesc.textContent='Spine aligned correctly';
+  } else if(st==='warn'){
+    postureLabel.textContent='⚡ SLIGHT LEAN'; postureLabel.style.color='var(--warn)';
+    statusCircle.textContent='⚡'; statusTitle.textContent='Warning'; statusTitle.style.color='var(--warn)';
+    statusDesc.textContent='Forward lean detected';
+  } else {
+    postureLabel.textContent='✗ SLOUCHING'; postureLabel.style.color='var(--bad)';
+    statusCircle.textContent='⚠️'; statusTitle.textContent='Bad Posture'; statusTitle.style.color='var(--bad)';
+    statusDesc.textContent='Spine severely misaligned!';
+  }
+  updateFigure(angle);
+}
+
+function formatTime(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+function addLog(msg){
+  const d=document.createElement('div');
+  const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.innerHTML=`<span style="color:var(--bad)">⚠</span> [${t}] ${msg}`;
+  if(alertLog.firstChild&&alertLog.firstChild.textContent.includes('No alerts')) alertLog.innerHTML='';
+  alertLog.prepend(d);
+}
+
+function updateHistory(){
+  historyTrack.innerHTML='';
+  const sl=historyData.slice(-60);
+  for(let i=0;i<60;i++){
+    const seg=document.createElement('div');
+    seg.className='history-seg';
+    if(i<60-sl.length){seg.style.background='var(--border)';seg.style.opacity='.4';}
+    else{const v=sl[i-(60-sl.length)];seg.style.background=v==='good'?'var(--good)':v==='warn'?'var(--warn)':'var(--bad)';}
+    historyTrack.appendChild(seg);
+  }
+}
+
+function updateAnalytics(){
+  document.getElementById('stat-total').textContent=formatTime(sessionSeconds);
+  document.getElementById('stat-good').textContent=formatTime(totalGoodSeconds);
+  document.getElementById('stat-bad').textContent=formatTime(totalBadSeconds);
+  document.getElementById('stat-pct').textContent=sessionSeconds>0?Math.round(totalGoodSeconds/sessionSeconds*100)+'%':'—';
+}
+
+function playBeep(){
+  if(!soundEnabled) return;
+  try{
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440,audioCtx.currentTime+0.3);
+    g.gain.setValueAtTime(0.3,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
+    o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.4);
+  }catch(e){}
+}
+
+function tick(){
+  if(!sessionRunning) return;
+  sessionSeconds++;
+  const angle=parseInt(slider.value),st=getStatus(angle);
+  if(st!=='bad'){
+    totalGoodSeconds++;badPostureSeconds=0;
+    badTimer.textContent='0s';badTimer.className='timer-value inactive';
+    badProgressFill.style.width='0%';alertShown=false;
+  } else {
+    totalBadSeconds++;badPostureSeconds++;
+    badTimer.textContent=badPostureSeconds+'s';badTimer.className='timer-value';
+    badProgressFill.style.width=Math.min(badPostureSeconds/10*100,100)+'%';
+    if(badPostureSeconds>=10&&!alertShown){
+      alertShown=true;alertCount++;
+      alertOverlay.classList.add('active');
+      addLog(`Alert #${alertCount} — Slouching for 10s`);
+      playBeep();
+    }
+  }
+  historyData.push(st);
+  sessionTimer.textContent=String(Math.floor(sessionSeconds/60)).padStart(2,'0')+':'+String(sessionSeconds%60).padStart(2,'0');
+  updateHistory();updateAnalytics();
+}
+
+slider.addEventListener('input',()=>updateUI(parseInt(slider.value)));
+
+sessionBtn.addEventListener('click',()=>{
+  if(!sessionRunning){
+    sessionRunning=true;sessionBtn.textContent='■ Stop';sessionBtn.className='btn btn-primary running';
+    document.getElementById('session-status-text').textContent='ACTIVE';
+    document.getElementById('session-status-text').style.color='var(--good)';
+    liveDot.style.background='var(--good)';liveDot.style.boxShadow='0 0 10px var(--good)';
+    intervalId=setInterval(tick,1000);
+  } else {
+    sessionRunning=false;sessionBtn.textContent='▶ Start';sessionBtn.className='btn btn-primary';
+    document.getElementById('session-status-text').textContent='PAUSED';
+    document.getElementById('session-status-text').style.color='var(--warn)';
+    liveDot.style.background='var(--neutral)';liveDot.style.boxShadow='none';
+    clearInterval(intervalId);
+  }
+});
+
+resetBtn.addEventListener('click',()=>{
+  sessionRunning=false;clearInterval(intervalId);
+  sessionSeconds=badPostureSeconds=totalGoodSeconds=totalBadSeconds=alertCount=0;
+  alertShown=false;historyData=[];
+  slider.value=0;updateUI(0);updateHistory();updateAnalytics();
+  sessionTimer.textContent='00:00';sessionTimer.className='timer-value inactive';
+  badTimer.textContent='0s';badTimer.className='timer-value inactive';
+  badProgressFill.style.width='0%';
+  sessionBtn.textContent='▶ Start';sessionBtn.className='btn btn-primary';
+  document.getElementById('session-status-text').textContent='IDLE';
+  document.getElementById('session-status-text').style.color='var(--neutral)';
+  liveDot.style.background='var(--neutral)';liveDot.style.boxShadow='none';
+  alertOverlay.classList.remove('active');
+  alertLog.innerHTML='<div style="color:var(--neutral);font-style:italic;">No alerts yet...</div>';
+});
+
+alertDismissBtn.addEventListener('click',()=>alertOverlay.classList.remove('active'));
+
+beepBtn.addEventListener('click',()=>{
+  soundEnabled=!soundEnabled;beepBtn.className=soundEnabled?'on':'';
+  if(soundEnabled){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();playBeep();}
+});
+
+updateUI(0);updateHistory();
+</script>
+</body>
+</html>
