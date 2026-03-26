@@ -178,7 +178,8 @@
             <line id="upper-arm" x1="105" y1="110" x2="120" y2="148" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
             <line id="forearm" x1="120" y1="148" x2="145" y2="148" stroke="#4a5160" stroke-width="2.5" stroke-linecap="round"/>
             <line id="neck" x1="105" y1="110" x2="105" y2="92" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
-            <circle id="head" cx="105" cy="80" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5"/>
+            <circle id="head" cx="105" cy="80" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5" style="cursor:grab;"/>
+            <circle id="head-hitarea" cx="105" cy="80" r="26" fill="transparent" style="cursor:grab;"/>
             <line id="nose" x1="107" y1="78" x2="120" y2="84" stroke="#4a5160" stroke-width="1.5" stroke-linecap="round"/>
             <circle id="eye" cx="112" cy="75" r="2" fill="#4a5160"/>
             <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
@@ -387,6 +388,7 @@ function updateFigure(angleDeg){
   neckEl.setAttribute('x1',sx); neckEl.setAttribute('y1',sy);
   neckEl.setAttribute('x2',nx); neckEl.setAttribute('y2',ny);
   headEl.setAttribute('cx',hcx); headEl.setAttribute('cy',hcy);
+  if(document.getElementById('head-hitarea')){document.getElementById('head-hitarea').setAttribute('cx',hcx);document.getElementById('head-hitarea').setAttribute('cy',hcy);}
   noseEl.setAttribute('x1',hcx+2); noseEl.setAttribute('y1',hcy+2);
   noseEl.setAttribute('x2',hcx+13); noseEl.setAttribute('y2',hcy+6);
   eyeEl.setAttribute('cx',hcx+7); eyeEl.setAttribute('cy',hcy-3);
@@ -669,6 +671,52 @@ document.addEventListener('keydown',(e)=>{
       break;
   }
 });
+
+// Head drag interaction
+const svgEl=document.querySelector('.svg-area svg');
+const headHit=document.getElementById('head-hitarea');
+const hipX=105,hipY=218;
+let dragging=false;
+
+function getSVGPoint(e){
+  const pt=svgEl.createSVGPoint();
+  const touch=e.touches?e.touches[0]:e;
+  pt.x=touch.clientX;pt.y=touch.clientY;
+  return pt.matrixTransform(svgEl.getScreenCTM().inverse());
+}
+
+function onDragStart(e){
+  e.preventDefault();
+  dragging=true;
+  headEl.style.cursor='grabbing';
+  headHit.style.cursor='grabbing';
+  if(autoSimRunning){ stopAutoSim(); showToast('Auto-simulation stopped'); }
+}
+
+function onDragMove(e){
+  if(!dragging) return;
+  e.preventDefault();
+  const p=getSVGPoint(e);
+  const dx=p.x-hipX,dy=hipY-p.y;
+  let angle=Math.atan2(dx,dy)*180/Math.PI;
+  angle=Math.max(0,Math.min(60,Math.round(angle)));
+  slider.value=angle;
+  updateUI(angle);
+}
+
+function onDragEnd(){
+  if(!dragging) return;
+  dragging=false;
+  headEl.style.cursor='grab';
+  headHit.style.cursor='grab';
+}
+
+headHit.addEventListener('mousedown',onDragStart);
+headHit.addEventListener('touchstart',onDragStart,{passive:false});
+document.addEventListener('mousemove',onDragMove);
+document.addEventListener('touchmove',onDragMove,{passive:false});
+document.addEventListener('mouseup',onDragEnd);
+document.addEventListener('touchend',onDragEnd);
 
 updateUI(0);updateHistory();
 </script>
