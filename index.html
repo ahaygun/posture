@@ -18,6 +18,10 @@
   @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
   .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; letter-spacing:.05em; }
   .logo-text span { color:var(--good); }
+  .lang-switcher { display:flex; align-items:center; gap:4px; margin-left:12px; }
+  .lang-btn { font-family:'Space Mono',monospace; font-size:.58rem; font-weight:700; letter-spacing:.05em; padding:4px 10px; border-radius:14px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all .2s; }
+  .lang-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .lang-btn:hover:not(.active) { border-color:var(--text-dim); color:var(--text); }
   .header-badge { margin-left:auto; font-size:.6rem; color:var(--text-dim); border:1px solid var(--border); padding:3px 10px; border-radius:20px; letter-spacing:.08em; }
   main { display:grid; grid-template-columns:1fr 300px; grid-template-rows:auto auto auto; gap:14px; padding:20px 28px; flex:1; max-width:1080px; margin:0 auto; width:100%; }
   .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px; }
@@ -97,23 +101,19 @@
   .alert-dismiss { background:var(--bad); color:#fff; border:none; padding:11px 28px; border-radius:8px; font-family:'Space Mono',monospace; font-size:.72rem; font-weight:700; cursor:pointer; }
   body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:999; }
 
-  /* Keyboard shortcuts tooltip */
   .shortcuts-hint { position:fixed; bottom:60px; right:20px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 16px; font-size:.56rem; color:var(--text-dim); line-height:2; z-index:50; opacity:0; transform:translateY(10px); transition:all .3s; pointer-events:none; }
   .shortcuts-hint.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
   .shortcuts-hint kbd { background:var(--border); color:var(--text); padding:2px 7px; border-radius:4px; font-family:'Space Mono',monospace; font-size:.58rem; margin:0 2px; }
 
-  /* Toast notification */
   .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--panel); border:1px solid var(--good); border-radius:10px; padding:12px 24px; font-size:.68rem; color:var(--good); z-index:300; transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s; opacity:0; white-space:nowrap; }
   .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
-  /* Footer */
   footer { padding:14px 28px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:.56rem; color:var(--text-dim); letter-spacing:.05em; }
   footer a { color:var(--accent); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
   .footer-shortcuts { display:flex; gap:14px; align-items:center; }
   .footer-shortcuts kbd { background:var(--border); color:var(--text); padding:1px 6px; border-radius:3px; font-family:'Space Mono',monospace; font-size:.54rem; }
 
-  /* Responsive */
   @media (max-width: 768px) {
     header { padding:12px 16px; gap:10px; }
     .header-badge { font-size:.5rem; padding:2px 8px; }
@@ -143,12 +143,16 @@
 <header>
   <div class="logo-dot" id="live-dot"></div>
   <div class="logo-text">Posture<span>Sim</span></div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" id="lang-tr" onclick="setLang('tr')">TR</button>
+    <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+  </div>
   <div class="header-badge">SIM v2.0 — MPU6050 EMULATOR</div>
 </header>
 
 <main>
   <div class="panel spine-panel">
-    <div class="panel-label">Side Profile — Posture Simulation</div>
+    <div class="panel-label" data-i18n="panelProfile">Yan Profil — Durus Simülasyonu</div>
     <div class="figure-wrap">
       <div class="svg-area">
         <svg width="260" height="300" viewBox="0 0 260 300" preserveAspectRatio="xMidYMid meet">
@@ -194,27 +198,27 @@
 
       <div class="controls-area">
         <div>
-          <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.12em; margin-bottom:6px;">TRUNK LEAN ANGLE</div>
+          <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.12em; margin-bottom:6px;" data-i18n="trunkAngle">GÖVDE EĞİLME AÇISI</div>
           <div class="angle-display" id="angle-display">0<span class="angle-unit">°</span></div>
-          <div class="posture-label" id="posture-label" style="color:var(--good)">✓ IDEAL POSTURE</div>
+          <div class="posture-label" id="posture-label" style="color:var(--good)" data-i18n="idealPosture">✓ İDEAL DURUŞ</div>
         </div>
         <div>
           <input type="range" id="angle-slider" min="0" max="60" value="0" step="1">
           <div class="slider-labels">
-            <span>0° Ideal</span><span>20° Warn</span><span>40°+ Bad</span>
+            <span data-i18n="sliderIdeal">0° İdeal</span><span data-i18n="sliderWarn">20° Uyarı</span><span data-i18n="sliderBad">40°+ Kötü</span>
           </div>
         </div>
         <div class="angle-guide">
-          <div class="guide-row"><div class="guide-dot" style="background:var(--good)"></div><span>0° – 20° → Upright, healthy spine</span></div>
-          <div class="guide-row"><div class="guide-dot" style="background:var(--warn)"></div><span>20° – 40° → Slight forward lean</span></div>
-          <div class="guide-row"><div class="guide-dot" style="background:var(--bad)"></div><span>40°+ → Slouched, spine stressed</span></div>
+          <div class="guide-row"><div class="guide-dot" style="background:var(--good)"></div><span data-i18n="guideGood">0° – 20° → Dik, sağlıklı omurga</span></div>
+          <div class="guide-row"><div class="guide-dot" style="background:var(--warn)"></div><span data-i18n="guideWarn">20° – 40° → Hafif öne eğilme</span></div>
+          <div class="guide-row"><div class="guide-dot" style="background:var(--bad)"></div><span data-i18n="guideBad">40°+ → Kamburlaşmış, omurga baskı altında</span></div>
         </div>
         <div class="controls-row">
-          <button class="btn btn-primary" id="session-btn">▶ Start</button>
-          <button class="btn btn-ghost" id="reset-btn">↺ Reset</button>
-          <button class="btn btn-auto" id="auto-btn">▷ Auto</button>
-          <button class="btn btn-export" id="export-btn">↓ Export</button>
-          <div id="beep-btn"><div class="dot"></div><span>Sound</span></div>
+          <button class="btn btn-primary" id="session-btn" data-i18n="btnStart">▶ Başlat</button>
+          <button class="btn btn-ghost" id="reset-btn" data-i18n="btnReset">↺ Sıfırla</button>
+          <button class="btn btn-auto" id="auto-btn" data-i18n="btnAuto">▷ Oto</button>
+          <button class="btn btn-export" id="export-btn" data-i18n="btnExport">↓ Dışa Aktar</button>
+          <div id="beep-btn"><div class="dot"></div><span data-i18n="sound">Ses</span></div>
         </div>
       </div>
     </div>
@@ -222,95 +226,247 @@
 
   <div class="status-panel">
     <div class="status-card">
-      <div class="panel-label">Posture Status</div>
+      <div class="panel-label" data-i18n="postureStatus">Duruş Durumu</div>
       <div class="status-indicator">
         <div class="status-circle good" id="status-circle">🧍</div>
         <div class="status-info">
-          <h3 id="status-title" style="color:var(--good)">Good Posture</h3>
-          <p id="status-desc">Spine aligned correctly</p>
+          <h3 id="status-title" style="color:var(--good)" data-i18n="goodPosture">İyi Duruş</h3>
+          <p id="status-desc" data-i18n="spineAligned">Omurga doğru hizalanmış</p>
         </div>
       </div>
       <div>
-        <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; margin-bottom:5px;">BAD POSTURE TIMER</div>
+        <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; margin-bottom:5px;" data-i18n="badPostureTimer">KÖTÜ DURUŞ SAYACI</div>
         <div class="timer-value inactive" id="bad-timer">0s</div>
-        <div style="font-size:.56rem; color:var(--text-dim); margin:4px 0 7px;">Alert threshold: 10s</div>
+        <div style="font-size:.56rem; color:var(--text-dim); margin:4px 0 7px;" data-i18n="alertThreshold">Uyarı eşiği: 10sn</div>
         <div class="bad-progress"><div class="bad-progress-fill" id="bad-progress-fill" style="width:0%"></div></div>
       </div>
     </div>
     <div class="status-card">
-      <div class="panel-label">Session Timer</div>
+      <div class="panel-label" data-i18n="sessionTimer">Oturum Sayacı</div>
       <div class="timer-row">
-        <span class="timer-label">ELAPSED</span>
+        <span class="timer-label" data-i18n="elapsed">GEÇEN SÜRE</span>
         <span class="timer-value inactive" id="session-timer">00:00</span>
       </div>
       <div class="timer-row">
-        <span class="timer-label">STATUS</span>
-        <span style="font-size:.62rem; color:var(--neutral);" id="session-status-text">IDLE</span>
+        <span class="timer-label" data-i18n="status">DURUM</span>
+        <span style="font-size:.62rem; color:var(--neutral);" id="session-status-text" data-i18n="idle">BEKLEMEDE</span>
       </div>
     </div>
     <div class="status-card">
-      <div class="panel-label">Alert Log</div>
+      <div class="panel-label" data-i18n="alertLog">Uyarı Günlüğü</div>
       <div id="alert-log" style="max-height:110px; overflow-y:auto; font-size:.6rem; color:var(--text-dim); line-height:1.9;">
-        <div style="color:var(--neutral); font-style:italic;">No alerts yet...</div>
+        <div style="color:var(--neutral); font-style:italic;" data-i18n="noAlerts">Henüz uyarı yok...</div>
       </div>
     </div>
   </div>
 
   <div class="panel history-panel">
-    <div class="panel-label">Posture History — Last 60s</div>
+    <div class="panel-label" data-i18n="historyTitle">Duruş Geçmişi — Son 60sn</div>
     <div class="history-track" id="history-track"></div>
     <div style="display:flex; gap:18px; margin-top:9px; font-size:.56rem; color:var(--text-dim);">
-      <span><span style="color:var(--good)">■</span> Good (0°–20°)</span>
-      <span><span style="color:var(--warn)">■</span> Warning (20°–40°)</span>
-      <span><span style="color:var(--bad)">■</span> Bad (40°+)</span>
+      <span><span style="color:var(--good)">■</span> <span data-i18n="histGood">İyi (0°–20°)</span></span>
+      <span><span style="color:var(--warn)">■</span> <span data-i18n="histWarn">Uyarı (20°–40°)</span></span>
+      <span><span style="color:var(--bad)">■</span> <span data-i18n="histBad">Kötü (40°+)</span></span>
     </div>
   </div>
 
   <div class="panel analytics-panel">
-    <div class="panel-label">Session Analytics</div>
+    <div class="panel-label" data-i18n="analytics">Oturum Analizi</div>
     <div class="stats-grid">
-      <div class="stat-card c-total"><div class="stat-label">Total Session</div><div class="stat-value" id="stat-total">0:00</div></div>
-      <div class="stat-card c-good"><div class="stat-label">Good Posture</div><div class="stat-value" id="stat-good">0:00</div></div>
-      <div class="stat-card c-bad"><div class="stat-label">Bad Posture</div><div class="stat-value" id="stat-bad">0:00</div></div>
-      <div class="stat-card c-pct"><div class="stat-label">Posture Score</div><div class="stat-value" id="stat-pct">—</div></div>
+      <div class="stat-card c-total"><div class="stat-label" data-i18n="statTotal">Toplam Oturum</div><div class="stat-value" id="stat-total">0:00</div></div>
+      <div class="stat-card c-good"><div class="stat-label" data-i18n="statGood">İyi Duruş</div><div class="stat-value" id="stat-good">0:00</div></div>
+      <div class="stat-card c-bad"><div class="stat-label" data-i18n="statBad">Kötü Duruş</div><div class="stat-value" id="stat-bad">0:00</div></div>
+      <div class="stat-card c-pct"><div class="stat-label" data-i18n="statScore">Duruş Puanı</div><div class="stat-value" id="stat-pct">—</div></div>
     </div>
   </div>
 </main>
 
 <footer>
-  <span>Posture Simulation v2.0 — MPU6050 Wearable Emulator</span>
+  <span data-i18n="footerTitle">Posture Simulation v2.0 — MPU6050 Giyilebilir Emülatör</span>
   <div class="footer-shortcuts">
-    <span><kbd>Space</kbd> Start/Stop</span>
-    <span><kbd>R</kbd> Reset</span>
-    <span><kbd>A</kbd> Auto-Sim</span>
-    <span><kbd>S</kbd> Sound</span>
-    <span><kbd>E</kbd> Export</span>
-    <span><kbd>?</kbd> Shortcuts</span>
+    <span><kbd>Space</kbd> <span data-i18n="fStartStop">Başlat/Durdur</span></span>
+    <span><kbd>R</kbd> <span data-i18n="fReset">Sıfırla</span></span>
+    <span><kbd>A</kbd> <span data-i18n="fAuto">Oto-Sim</span></span>
+    <span><kbd>S</kbd> <span data-i18n="fSound">Ses</span></span>
+    <span><kbd>E</kbd> <span data-i18n="fExport">Dışa Aktar</span></span>
+    <span><kbd>?</kbd> <span data-i18n="fShortcuts">Kısayollar</span></span>
   </div>
 </footer>
 
 <div id="alert-overlay">
   <div class="alert-box">
     <div class="alert-icon">⚠️</div>
-    <h2>Poor Posture Alert!</h2>
-    <p>You've been slouched for over 10 seconds.<br>Sit upright and align your spine.</p>
-    <button class="alert-dismiss" id="alert-dismiss-btn">DISMISS</button>
+    <h2 data-i18n="alertTitle">Kötü Duruş Uyarısı!</h2>
+    <p><span data-i18n="alertMsg1">10 saniyedir kamburlaşmış durumdasınız.</span><br><span data-i18n="alertMsg2">Dik oturun ve omurganızı hizalayın.</span></p>
+    <button class="alert-dismiss" id="alert-dismiss-btn" data-i18n="dismiss">KAPAT</button>
   </div>
 </div>
 
 <div class="shortcuts-hint" id="shortcuts-hint">
-  <div><kbd>Space</kbd> Start / Stop session</div>
-  <div><kbd>R</kbd> Reset session</div>
-  <div><kbd>A</kbd> Toggle auto-simulation</div>
-  <div><kbd>S</kbd> Toggle sound</div>
-  <div><kbd>E</kbd> Export session report</div>
-  <div><kbd>↑</kbd> <kbd>↓</kbd> Adjust angle ±5°</div>
-  <div><kbd>?</kbd> Toggle this panel</div>
+  <div><kbd>Space</kbd> <span data-i18n="scStartStop">Oturumu Başlat / Durdur</span></div>
+  <div><kbd>R</kbd> <span data-i18n="scReset">Oturumu Sıfırla</span></div>
+  <div><kbd>A</kbd> <span data-i18n="scAuto">Otomatik simülasyon aç/kapa</span></div>
+  <div><kbd>S</kbd> <span data-i18n="scSound">Ses aç/kapa</span></div>
+  <div><kbd>E</kbd> <span data-i18n="scExport">Oturum raporunu dışa aktar</span></div>
+  <div><kbd>↑</kbd> <kbd>↓</kbd> <span data-i18n="scAngle">Açıyı ±5° ayarla</span></div>
+  <div><kbd>?</kbd> <span data-i18n="scToggle">Bu paneli aç/kapa</span></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ── i18n ──
+const T={
+  tr:{
+    panelProfile:'Yan Profil — Duruş Simülasyonu',
+    trunkAngle:'GÖVDE EĞİLME AÇISI',
+    idealPosture:'✓ İDEAL DURUŞ',
+    slightLean:'⚡ HAFİF EĞİLME',
+    slouching:'✗ KAMBURLAŞMA',
+    sliderIdeal:'0° İdeal', sliderWarn:'20° Uyarı', sliderBad:'40°+ Kötü',
+    guideGood:'0° – 20° → Dik, sağlıklı omurga',
+    guideWarn:'20° – 40° → Hafif öne eğilme',
+    guideBad:'40°+ → Kamburlaşmış, omurga baskı altında',
+    btnStart:'▶ Başlat', btnStop:'■ Durdur', btnReset:'↺ Sıfırla',
+    btnAuto:'▷ Oto', btnAutoStop:'■ Oto',
+    btnExport:'↓ Dışa Aktar', sound:'Ses',
+    postureStatus:'Duruş Durumu',
+    goodPosture:'İyi Duruş', warning:'Uyarı', badPosture:'Kötü Duruş',
+    spineAligned:'Omurga doğru hizalanmış',
+    forwardLean:'Öne eğilme tespit edildi',
+    spineMisaligned:'Omurga ciddi şekilde bozuk!',
+    badPostureTimer:'KÖTÜ DURUŞ SAYACI',
+    alertThreshold:'Uyarı eşiği: 10sn',
+    sessionTimer:'Oturum Sayacı',
+    elapsed:'GEÇEN SÜRE', status:'DURUM',
+    idle:'BEKLEMEDE', active:'AKTİF', paused:'DURAKLATILDI',
+    alertLog:'Uyarı Günlüğü', noAlerts:'Henüz uyarı yok...',
+    historyTitle:'Duruş Geçmişi — Son 60sn',
+    histGood:'İyi (0°–20°)', histWarn:'Uyarı (20°–40°)', histBad:'Kötü (40°+)',
+    analytics:'Oturum Analizi',
+    statTotal:'Toplam Oturum', statGood:'İyi Duruş', statBad:'Kötü Duruş', statScore:'Duruş Puanı',
+    footerTitle:'Posture Simulation v2.0 — MPU6050 Giyilebilir Emülatör',
+    fStartStop:'Başlat/Durdur', fReset:'Sıfırla', fAuto:'Oto-Sim',
+    fSound:'Ses', fExport:'Dışa Aktar', fShortcuts:'Kısayollar',
+    alertTitle:'Kötü Duruş Uyarısı!',
+    alertMsg1:'10 saniyedir kamburlaşmış durumdasınız.',
+    alertMsg2:'Dik oturun ve omurganızı hizalayın.',
+    dismiss:'KAPAT',
+    scStartStop:'Oturumu Başlat / Durdur', scReset:'Oturumu Sıfırla',
+    scAuto:'Otomatik simülasyon aç/kapa', scSound:'Ses aç/kapa',
+    scExport:'Oturum raporunu dışa aktar', scAngle:'Açıyı ±5° ayarla',
+    scToggle:'Bu paneli aç/kapa',
+    toastReset:'Oturum sıfırlandı',
+    toastSoundOn:'Ses AÇIK', toastSoundOff:'Ses KAPALI',
+    toastAutoStart:'Otomatik simülasyon başlatıldı',
+    toastAutoStop:'Otomatik simülasyon durduruldu',
+    toastNoData:'Dışa aktarılacak veri yok',
+    toastExported:'Rapor dışa aktarıldı!',
+    alertLogMsg:'Uyarı',
+    alertLogSuffix:'— 10sn boyunca kamburlaşma',
+    reportTitle:'DURUŞ SİMÜLASYONU OTURUM RAPORU',
+    reportDate:'Tarih', reportTime:'Saat',
+    reportSummary:'Oturum Özeti',
+    reportDuration:'Toplam Süre', reportGood:'İyi Duruş', reportBad:'Kötü Duruş',
+    reportScore:'Duruş Puanı', reportAlerts:'Toplam Uyarı',
+    reportHistory:'Duruş Geçmişi (son 60sn)',
+    reportRating:'Değerlendirme',
+    rateExcellent:'Mükemmel! İyi duruşu korumaya devam edin.',
+    rateGood:'İyi çaba. Öne eğilmeyi azaltmaya çalışın.',
+    rateNeedsWork:'Geliştirilmesi gerekiyor. Dik oturma hatırlatıcıları ayarlayın.',
+    ratePoor:'Kötü duruş tespit edildi. Ergonomik düzenlemeler yapın.',
+    reportGenerated:'Posture Simulation v2.0 tarafından oluşturuldu'
+  },
+  en:{
+    panelProfile:'Side Profile — Posture Simulation',
+    trunkAngle:'TRUNK LEAN ANGLE',
+    idealPosture:'✓ IDEAL POSTURE',
+    slightLean:'⚡ SLIGHT LEAN',
+    slouching:'✗ SLOUCHING',
+    sliderIdeal:'0° Ideal', sliderWarn:'20° Warn', sliderBad:'40°+ Bad',
+    guideGood:'0° – 20° → Upright, healthy spine',
+    guideWarn:'20° – 40° → Slight forward lean',
+    guideBad:'40°+ → Slouched, spine stressed',
+    btnStart:'▶ Start', btnStop:'■ Stop', btnReset:'↺ Reset',
+    btnAuto:'▷ Auto', btnAutoStop:'■ Auto',
+    btnExport:'↓ Export', sound:'Sound',
+    postureStatus:'Posture Status',
+    goodPosture:'Good Posture', warning:'Warning', badPosture:'Bad Posture',
+    spineAligned:'Spine aligned correctly',
+    forwardLean:'Forward lean detected',
+    spineMisaligned:'Spine severely misaligned!',
+    badPostureTimer:'BAD POSTURE TIMER',
+    alertThreshold:'Alert threshold: 10s',
+    sessionTimer:'Session Timer',
+    elapsed:'ELAPSED', status:'STATUS',
+    idle:'IDLE', active:'ACTIVE', paused:'PAUSED',
+    alertLog:'Alert Log', noAlerts:'No alerts yet...',
+    historyTitle:'Posture History — Last 60s',
+    histGood:'Good (0°–20°)', histWarn:'Warning (20°–40°)', histBad:'Bad (40°+)',
+    analytics:'Session Analytics',
+    statTotal:'Total Session', statGood:'Good Posture', statBad:'Bad Posture', statScore:'Posture Score',
+    footerTitle:'Posture Simulation v2.0 — MPU6050 Wearable Emulator',
+    fStartStop:'Start/Stop', fReset:'Reset', fAuto:'Auto-Sim',
+    fSound:'Sound', fExport:'Export', fShortcuts:'Shortcuts',
+    alertTitle:'Poor Posture Alert!',
+    alertMsg1:'You\'ve been slouched for over 10 seconds.',
+    alertMsg2:'Sit upright and align your spine.',
+    dismiss:'DISMISS',
+    scStartStop:'Start / Stop session', scReset:'Reset session',
+    scAuto:'Toggle auto-simulation', scSound:'Toggle sound',
+    scExport:'Export session report', scAngle:'Adjust angle ±5°',
+    scToggle:'Toggle this panel',
+    toastReset:'Session reset',
+    toastSoundOn:'Sound ON', toastSoundOff:'Sound OFF',
+    toastAutoStart:'Auto-simulation started',
+    toastAutoStop:'Auto-simulation stopped',
+    toastNoData:'No session data to export',
+    toastExported:'Report exported!',
+    alertLogMsg:'Alert',
+    alertLogSuffix:'— Slouching for 10s',
+    reportTitle:'POSTURE SIMULATION SESSION REPORT',
+    reportDate:'Date', reportTime:'Time',
+    reportSummary:'Session Summary',
+    reportDuration:'Total Duration', reportGood:'Good Posture', reportBad:'Bad Posture',
+    reportScore:'Posture Score', reportAlerts:'Total Alerts',
+    reportHistory:'Posture History (last 60s)',
+    reportRating:'Rating',
+    rateExcellent:'Excellent! Keep up the good posture.',
+    rateGood:'Good effort. Try to reduce forward lean.',
+    rateNeedsWork:'Needs improvement. Set reminders to sit upright.',
+    ratePoor:'Poor posture detected. Consider ergonomic adjustments.',
+    reportGenerated:'Generated by Posture Simulation v2.0'
+  }
+};
+
+let currentLang='tr';
+
+function t(key){ return T[currentLang][key]||key; }
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(T[currentLang][key]) el.textContent=T[currentLang][key];
+  });
+  document.getElementById('lang-tr').className='lang-btn'+(currentLang==='tr'?' active':'');
+  document.getElementById('lang-en').className='lang-btn'+(currentLang==='en'?' active':'');
+  document.documentElement.lang=currentLang;
+  // Update dynamic button states
+  if(sessionRunning) sessionBtn.textContent=t('btnStop');
+  else sessionBtn.textContent=t('btnStart');
+  if(autoSimRunning) autoBtn.textContent=t('btnAutoStop');
+  else autoBtn.textContent=t('btnAuto');
+  // Re-apply posture label for current angle
+  updateUI(parseInt(slider.value));
+}
+
+function setLang(lang){
+  currentLang=lang;
+  applyLang();
+  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled,lang:currentLang}));
+}
+
+// ── State ──
 let sessionRunning=false,sessionSeconds=0,badPostureSeconds=0;
 let totalGoodSeconds=0,totalBadSeconds=0;
 let alertShown=false,alertCount=0,soundEnabled=false;
@@ -350,19 +506,20 @@ const exportBtn=document.getElementById('export-btn');
 const shortcutsHint=document.getElementById('shortcuts-hint');
 const toastEl=document.getElementById('toast');
 
-// Load saved preferences from localStorage
+// Load saved preferences
 (function loadPrefs(){
   const saved=localStorage.getItem('postureguard-prefs');
   if(saved){
     try{
       const p=JSON.parse(saved);
       if(p.soundEnabled){soundEnabled=true;beepBtn.className='on';}
+      if(p.lang&&T[p.lang]){currentLang=p.lang;}
     }catch(e){}
   }
 })();
 
 function savePrefs(){
-  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled}));
+  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled,lang:currentLang}));
 }
 
 function showToast(msg){
@@ -388,7 +545,8 @@ function updateFigure(angleDeg){
   neckEl.setAttribute('x1',sx); neckEl.setAttribute('y1',sy);
   neckEl.setAttribute('x2',nx); neckEl.setAttribute('y2',ny);
   headEl.setAttribute('cx',hcx); headEl.setAttribute('cy',hcy);
-  if(document.getElementById('head-hitarea')){document.getElementById('head-hitarea').setAttribute('cx',hcx);document.getElementById('head-hitarea').setAttribute('cy',hcy);}
+  const hh=document.getElementById('head-hitarea');
+  if(hh){hh.setAttribute('cx',hcx);hh.setAttribute('cy',hcy);}
   noseEl.setAttribute('x1',hcx+2); noseEl.setAttribute('y1',hcy+2);
   noseEl.setAttribute('x2',hcx+13); noseEl.setAttribute('y2',hcy+6);
   eyeEl.setAttribute('cx',hcx+7); eyeEl.setAttribute('cy',hcy-3);
@@ -425,17 +583,17 @@ function updateUI(angle){
   angleDisplay.style.color=col;
   statusCircle.className='status-circle '+st;
   if(st==='good'){
-    postureLabel.textContent='✓ IDEAL POSTURE'; postureLabel.style.color='var(--good)';
-    statusCircle.textContent='🧍'; statusTitle.textContent='Good Posture'; statusTitle.style.color='var(--good)';
-    statusDesc.textContent='Spine aligned correctly';
+    postureLabel.textContent=t('idealPosture'); postureLabel.style.color='var(--good)';
+    statusCircle.textContent='🧍'; statusTitle.textContent=t('goodPosture'); statusTitle.style.color='var(--good)';
+    statusDesc.textContent=t('spineAligned');
   } else if(st==='warn'){
-    postureLabel.textContent='⚡ SLIGHT LEAN'; postureLabel.style.color='var(--warn)';
-    statusCircle.textContent='⚡'; statusTitle.textContent='Warning'; statusTitle.style.color='var(--warn)';
-    statusDesc.textContent='Forward lean detected';
+    postureLabel.textContent=t('slightLean'); postureLabel.style.color='var(--warn)';
+    statusCircle.textContent='⚡'; statusTitle.textContent=t('warning'); statusTitle.style.color='var(--warn)';
+    statusDesc.textContent=t('forwardLean');
   } else {
-    postureLabel.textContent='✗ SLOUCHING'; postureLabel.style.color='var(--bad)';
-    statusCircle.textContent='⚠️'; statusTitle.textContent='Bad Posture'; statusTitle.style.color='var(--bad)';
-    statusDesc.textContent='Spine severely misaligned!';
+    postureLabel.textContent=t('slouching'); postureLabel.style.color='var(--bad)';
+    statusCircle.textContent='⚠️'; statusTitle.textContent=t('badPosture'); statusTitle.style.color='var(--bad)';
+    statusDesc.textContent=t('spineMisaligned');
   }
   updateFigure(angle);
 }
@@ -444,9 +602,11 @@ function formatTime(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')
 
 function addLog(msg){
   const d=document.createElement('div');
-  const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  d.innerHTML=`<span style="color:var(--bad)">⚠</span> [${t}] ${msg}`;
+  const time=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.innerHTML=`<span style="color:var(--bad)">⚠</span> [${time}] ${msg}`;
+  if(alertLog.firstChild&&alertLog.firstChild.textContent.includes(t('noAlerts'))) alertLog.innerHTML='';
   if(alertLog.firstChild&&alertLog.firstChild.textContent.includes('No alerts')) alertLog.innerHTML='';
+  if(alertLog.firstChild&&alertLog.firstChild.textContent.includes('Henüz')) alertLog.innerHTML='';
   alertLog.prepend(d);
 }
 
@@ -498,7 +658,7 @@ function tick(){
     if(badPostureSeconds>=10&&!alertShown){
       alertShown=true;alertCount++;
       alertOverlay.classList.add('active');
-      addLog(`Alert #${alertCount} — Slouching for 10s`);
+      addLog(`${t('alertLogMsg')} #${alertCount} ${t('alertLogSuffix')}`);
       playBeep();
     }
   }
@@ -511,8 +671,8 @@ slider.addEventListener('input',()=>updateUI(parseInt(slider.value)));
 
 function startSession(){
   if(sessionRunning) return;
-  sessionRunning=true;sessionBtn.textContent='■ Stop';sessionBtn.className='btn btn-primary running';
-  document.getElementById('session-status-text').textContent='ACTIVE';
+  sessionRunning=true;sessionBtn.textContent=t('btnStop');sessionBtn.className='btn btn-primary running';
+  document.getElementById('session-status-text').textContent=t('active');
   document.getElementById('session-status-text').style.color='var(--good)';
   liveDot.style.background='var(--good)';liveDot.style.boxShadow='0 0 10px var(--good)';
   intervalId=setInterval(tick,1000);
@@ -520,8 +680,8 @@ function startSession(){
 
 function stopSession(){
   if(!sessionRunning) return;
-  sessionRunning=false;sessionBtn.textContent='▶ Start';sessionBtn.className='btn btn-primary';
-  document.getElementById('session-status-text').textContent='PAUSED';
+  sessionRunning=false;sessionBtn.textContent=t('btnStart');sessionBtn.className='btn btn-primary';
+  document.getElementById('session-status-text').textContent=t('paused');
   document.getElementById('session-status-text').style.color='var(--warn)';
   liveDot.style.background='var(--neutral)';liveDot.style.boxShadow='none';
   clearInterval(intervalId);
@@ -540,13 +700,13 @@ function resetSession(){
   sessionTimer.textContent='00:00';sessionTimer.className='timer-value inactive';
   badTimer.textContent='0s';badTimer.className='timer-value inactive';
   badProgressFill.style.width='0%';
-  sessionBtn.textContent='▶ Start';sessionBtn.className='btn btn-primary';
-  document.getElementById('session-status-text').textContent='IDLE';
+  sessionBtn.textContent=t('btnStart');sessionBtn.className='btn btn-primary';
+  document.getElementById('session-status-text').textContent=t('idle');
   document.getElementById('session-status-text').style.color='var(--neutral)';
   liveDot.style.background='var(--neutral)';liveDot.style.boxShadow='none';
   alertOverlay.classList.remove('active');
-  alertLog.innerHTML='<div style="color:var(--neutral);font-style:italic;">No alerts yet...</div>';
-  showToast('Session reset');
+  alertLog.innerHTML=`<div style="color:var(--neutral);font-style:italic;">${t('noAlerts')}</div>`;
+  showToast(t('toastReset'));
 }
 
 resetBtn.addEventListener('click',resetSession);
@@ -557,14 +717,14 @@ beepBtn.addEventListener('click',()=>{
   soundEnabled=!soundEnabled;beepBtn.className=soundEnabled?'on':'';
   if(soundEnabled){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();playBeep();}
   savePrefs();
-  showToast(soundEnabled?'Sound ON':'Sound OFF');
+  showToast(soundEnabled?t('toastSoundOn'):t('toastSoundOff'));
 });
 
 // Auto-simulation
 function startAutoSim(){
   if(autoSimRunning) return;
   autoSimRunning=true;
-  autoBtn.textContent='■ Auto';autoBtn.classList.add('active');
+  autoBtn.textContent=t('btnAutoStop');autoBtn.classList.add('active');
   autoSimTarget=Math.random()*60;
   autoSimCurrent=parseInt(slider.value);
   if(!sessionRunning) startSession();
@@ -578,57 +738,62 @@ function startAutoSim(){
     slider.value=v;
     updateUI(v);
   },100);
-  showToast('Auto-simulation started');
+  showToast(t('toastAutoStart'));
 }
 
 function stopAutoSim(){
   if(!autoSimRunning) return;
   autoSimRunning=false;
-  autoBtn.textContent='▷ Auto';autoBtn.classList.remove('active');
+  autoBtn.textContent=t('btnAuto');autoBtn.classList.remove('active');
   clearInterval(autoSimInterval);
 }
 
 autoBtn.addEventListener('click',()=>{
-  if(!autoSimRunning) startAutoSim(); else { stopAutoSim(); showToast('Auto-simulation stopped'); }
+  if(!autoSimRunning) startAutoSim(); else { stopAutoSim(); showToast(t('toastAutoStop')); }
 });
 
 // Export session report
 function exportReport(){
-  if(sessionSeconds===0){ showToast('No session data to export'); return; }
+  if(sessionSeconds===0){ showToast(t('toastNoData')); return; }
   const now=new Date();
   const score=sessionSeconds>0?Math.round(totalGoodSeconds/sessionSeconds*100):0;
+  let rating;
+  if(score>=80) rating=t('rateExcellent');
+  else if(score>=60) rating=t('rateGood');
+  else if(score>=40) rating=t('rateNeedsWork');
+  else rating=t('ratePoor');
   const lines=[
-    '╔══════════════════════════════════════╗',
-    '║    POSTURE SIMULATION SESSION REPORT  ║',
-    '╚══════════════════════════════════════╝',
+    '╔══════════════════════════════════════════╗',
+    `║  ${t('reportTitle')}  ║`,
+    '╚══════════════════════════════════════════╝',
     '',
-    `Date: ${now.toLocaleDateString('tr-TR')}`,
-    `Time: ${now.toLocaleTimeString('tr-TR')}`,
+    `${t('reportDate')}: ${now.toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US')}`,
+    `${t('reportTime')}: ${now.toLocaleTimeString(currentLang==='tr'?'tr-TR':'en-US')}`,
     '',
-    '── Session Summary ──────────────────',
-    `Total Duration:   ${formatTime(sessionSeconds)}`,
-    `Good Posture:     ${formatTime(totalGoodSeconds)}`,
-    `Bad Posture:      ${formatTime(totalBadSeconds)}`,
-    `Posture Score:    ${score}%`,
-    `Total Alerts:     ${alertCount}`,
+    `── ${t('reportSummary')} ──────────────────`,
+    `${t('reportDuration')}:   ${formatTime(sessionSeconds)}`,
+    `${t('reportGood')}:     ${formatTime(totalGoodSeconds)}`,
+    `${t('reportBad')}:      ${formatTime(totalBadSeconds)}`,
+    `${t('reportScore')}:    ${score}%`,
+    `${t('reportAlerts')}:     ${alertCount}`,
     '',
-    '── Posture History (last 60s) ───────',
+    `── ${t('reportHistory')} ───────`,
     historyData.slice(-60).map(s=>s==='good'?'█':s==='warn'?'▓':'░').join(''),
     '',
-    `█ Good  ▓ Warning  ░ Bad`,
+    `█ ${t('histGood')}  ▓ ${t('histWarn')}  ░ ${t('histBad')}`,
     '',
-    '── Rating ──────────────────────────',
-    score>=80?'Excellent! Keep up the good posture.':score>=60?'Good effort. Try to reduce forward lean.':score>=40?'Needs improvement. Set reminders to sit upright.':'Poor posture detected. Consider ergonomic adjustments.',
+    `── ${t('reportRating')} ──────────────────────`,
+    rating,
     '',
-    'Generated by Posture Simulation v2.0'
+    t('reportGenerated')
   ];
   const blob=new Blob([lines.join('\n')],{type:'text/plain'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`postureguard-report-${now.toISOString().slice(0,10)}.txt`;
+  a.download=`posture-report-${now.toISOString().slice(0,10)}.txt`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Report exported!');
+  showToast(t('toastExported'));
 }
 
 exportBtn.addEventListener('click',exportReport);
@@ -645,13 +810,13 @@ document.addEventListener('keydown',(e)=>{
       resetSession();
       break;
     case 'a':
-      if(!autoSimRunning) startAutoSim(); else { stopAutoSim(); showToast('Auto-simulation stopped'); }
+      if(!autoSimRunning) startAutoSim(); else { stopAutoSim(); showToast(t('toastAutoStop')); }
       break;
     case 's':
       soundEnabled=!soundEnabled;beepBtn.className=soundEnabled?'on':'';
       if(soundEnabled){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();playBeep();}
       savePrefs();
-      showToast(soundEnabled?'Sound ON':'Sound OFF');
+      showToast(soundEnabled?t('toastSoundOn'):t('toastSoundOff'));
       break;
     case 'e':
       exportReport();
@@ -690,7 +855,7 @@ function onDragStart(e){
   dragging=true;
   headEl.style.cursor='grabbing';
   headHit.style.cursor='grabbing';
-  if(autoSimRunning){ stopAutoSim(); showToast('Auto-simulation stopped'); }
+  if(autoSimRunning){ stopAutoSim(); showToast(t('toastAutoStop')); }
 }
 
 function onDragMove(e){
@@ -718,6 +883,8 @@ document.addEventListener('touchmove',onDragMove,{passive:false});
 document.addEventListener('mouseup',onDragEnd);
 document.addEventListener('touchend',onDragEnd);
 
+// Init
+applyLang();
 updateUI(0);updateHistory();
 </script>
 </body>
