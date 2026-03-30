@@ -10,10 +10,20 @@
     --bg: #0a0c10; --panel: #111318; --border: #1e2128;
     --good: #00e5a0; --warn: #f5c518; --bad: #ff3b4e;
     --neutral: #4a5160; --text: #e8eaf0; --text-dim: #6b7280; --accent: #4f8eff;
+    --chair: #1a1d24; --chair-stroke: #2a2f3d; --body: #4a5160; --body-fill: #22263a;
+    --monitor-bg: #0d1017; --monitor-inner: #141822; --grid-line: #1e2128;
+    --scanline: rgba(0,0,0,.04);
+  }
+  [data-theme="light"] {
+    --bg: #f0f2f5; --panel: #ffffff; --border: #d8dce3;
+    --neutral: #8c95a6; --text: #1a1d24; --text-dim: #5a6270; --accent: #3b7cef;
+    --chair: #c8cdd6; --chair-stroke: #a0a8b5; --body: #6b7280; --body-fill: #d0d5de;
+    --monitor-bg: #e0e3e8; --monitor-inner: #ebedf2; --grid-line: #d8dce3;
+    --scanline: rgba(255,255,255,.04);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'Space Mono',monospace; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; }
-  header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; background:rgba(10,12,16,0.95); position:sticky; top:0; z-index:100; }
+  header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; background:var(--bg); position:sticky; top:0; z-index:100; }
   .logo-dot { width:9px; height:9px; border-radius:50%; background:var(--good); box-shadow:0 0 10px var(--good); animation:pdot 2s ease-in-out infinite; }
   @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
   .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; letter-spacing:.05em; }
@@ -96,14 +106,17 @@
   #alert-overlay { position:fixed; inset:0; background:rgba(255,59,78,.08); border:3px solid var(--bad); z-index:200; display:none; align-items:center; justify-content:center; animation:fbg .5s ease-in-out infinite; }
   #alert-overlay.active { display:flex; }
   @keyframes fbg { 0%,100%{background:rgba(255,59,78,.06)} 50%{background:rgba(255,59,78,.16)} }
-  .alert-box { background:#1a0b0e; border:2px solid var(--bad); border-radius:16px; padding:36px 44px; text-align:center; box-shadow:0 0 55px rgba(255,59,78,.4); animation:aslide .3s cubic-bezier(.34,1.56,.64,1); }
+  .alert-box { background:var(--panel); border:2px solid var(--bad); border-radius:16px; padding:36px 44px; text-align:center; box-shadow:0 0 55px rgba(255,59,78,.4); animation:aslide .3s cubic-bezier(.34,1.56,.64,1); }
   @keyframes aslide { from{transform:scale(.8) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
   .alert-icon { font-size:2.8rem; margin-bottom:10px; animation:shake .5s ease-in-out infinite; }
   @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
   .alert-box h2 { font-family:'Syne',sans-serif; font-size:1.4rem; color:var(--bad); margin-bottom:6px; }
   .alert-box p { color:var(--text-dim); font-size:.72rem; margin-bottom:20px; }
   .alert-dismiss { background:var(--bad); color:#fff; border:none; padding:11px 28px; border-radius:8px; font-family:'Space Mono',monospace; font-size:.72rem; font-weight:700; cursor:pointer; }
-  body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:999; }
+  body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px); pointer-events:none; z-index:999; }
+  /* Theme toggle */
+  .theme-btn { font-family:'Space Mono',monospace; font-size:.72rem; padding:4px 10px; border-radius:14px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all .2s; margin-left:4px; line-height:1; }
+  .theme-btn:hover { border-color:var(--text-dim); color:var(--text); }
 
   .shortcuts-hint { position:fixed; bottom:60px; right:20px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 16px; font-size:.56rem; color:var(--text-dim); line-height:2; z-index:50; opacity:0; transform:translateY(10px); transition:all .3s; pointer-events:none; }
   .shortcuts-hint.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
@@ -150,6 +163,7 @@
   <div class="lang-switcher">
     <button class="lang-btn active" id="lang-tr" onclick="setLang('tr')">TR</button>
     <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀</button>
   </div>
   <div class="source-indicator" id="source-indicator">
     <div class="source-dot" id="source-dot"></div>
@@ -166,71 +180,71 @@
         <svg width="280" height="300" viewBox="0 0 280 300" preserveAspectRatio="xMidYMid meet">
           <defs>
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M20 0L0 0 0 20" fill="none" stroke="#1e2128" stroke-width="0.5"/>
+              <path d="M20 0L0 0 0 20" fill="none" stroke="var(--grid-line)" stroke-width="0.5"/>
             </pattern>
           </defs>
           <rect width="280" height="300" fill="url(#grid)" opacity="0.6"/>
-          <line x1="85" y1="10" x2="85" y2="290" stroke="#1e2128" stroke-width="1" stroke-dasharray="5,5"/>
-          <text x="88" y="22" fill="#3a4155" font-size="8" font-family="Space Mono">PLUMB</text>
+          <line x1="85" y1="10" x2="85" y2="290" stroke="var(--grid-line)" stroke-width="1" stroke-dasharray="5,5"/>
+          <text x="88" y="22" fill="var(--text-dim)" font-size="8" font-family="Space Mono" opacity="0.6">PLUMB</text>
           <!-- Ground -->
-          <line x1="10" y1="272" x2="270" y2="272" stroke="#1e2128" stroke-width="1.5"/>
+          <line x1="10" y1="272" x2="270" y2="272" stroke="var(--grid-line)" stroke-width="1.5"/>
           <!-- Desk -->
-          <rect x="155" y="182" width="90" height="6" rx="2" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
-          <line x1="165" y1="188" x2="165" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
-          <line x1="235" y1="188" x2="235" y2="270" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <rect x="155" y="182" width="90" height="6" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
+          <line x1="165" y1="188" x2="165" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="235" y1="188" x2="235" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
           <!-- Monitor -->
-          <rect x="183" y="120" width="48" height="36" rx="3" fill="#0d1017" stroke="#2a2f3d" stroke-width="1.5"/>
-          <rect x="186" y="123" width="42" height="30" rx="1" fill="#141822" stroke="#1e2128" stroke-width="0.5"/>
-          <line x1="207" y1="156" x2="207" y2="168" stroke="#2a2f3d" stroke-width="2"/>
-          <rect x="197" y="168" width="20" height="3" rx="1" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1"/>
+          <rect x="183" y="120" width="48" height="36" rx="3" fill="var(--monitor-bg)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
+          <rect x="186" y="123" width="42" height="30" rx="1" fill="var(--monitor-inner)" stroke="var(--grid-line)" stroke-width="0.5"/>
+          <line x1="207" y1="156" x2="207" y2="168" stroke="var(--chair-stroke)" stroke-width="2"/>
+          <rect x="197" y="168" width="20" height="3" rx="1" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1"/>
           <!-- Monitor stand base on desk -->
-          <rect x="193" y="171" width="28" height="11" rx="2" fill="#1a1d24" stroke="#2a2f3d" stroke-width="0.8"/>
+          <rect x="193" y="171" width="28" height="11" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
           <!-- Keyboard on desk -->
-          <rect x="170" y="176" width="22" height="5" rx="1.5" fill="#1a1d24" stroke="#2a2f3d" stroke-width="0.8"/>
+          <rect x="170" y="176" width="22" height="5" rx="1.5" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
           <!-- Office Chair -->
           <!-- Seat cushion -->
-          <rect x="55" y="218" width="75" height="8" rx="4" fill="#1a1d24" stroke="#2a2f3d" stroke-width="1.5"/>
+          <rect x="55" y="218" width="75" height="8" rx="4" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
           <!-- Backrest (behind person, on left) -->
-          <path d="M58,218 Q48,190 52,148" fill="none" stroke="#2a2f3d" stroke-width="5" stroke-linecap="round"/>
-          <path d="M58,218 Q48,190 52,148" fill="none" stroke="#1a1d24" stroke-width="3" stroke-linecap="round"/>
+          <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair-stroke)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair)" stroke-width="3" stroke-linecap="round"/>
           <!-- Chair cylinder -->
-          <line x1="92" y1="226" x2="92" y2="252" stroke="#2a2f3d" stroke-width="3" stroke-linecap="round"/>
+          <line x1="92" y1="226" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
           <!-- Chair base (5-star) -->
-          <line x1="68" y1="270" x2="92" y2="252" stroke="#2a2f3d" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="116" y1="270" x2="92" y2="252" stroke="#2a2f3d" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="68" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="116" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
           <!-- Casters -->
-          <circle cx="68" cy="271" r="3" fill="#2a2f3d"/>
-          <circle cx="116" cy="271" r="3" fill="#2a2f3d"/>
+          <circle cx="68" cy="271" r="3" fill="var(--chair-stroke)"/>
+          <circle cx="116" cy="271" r="3" fill="var(--chair-stroke)"/>
           <!-- Person -->
           <g id="person-group">
             <!-- Hip/pelvis -->
-            <ellipse cx="85" cy="216" rx="14" ry="8" fill="#22263a" stroke="#4a5160" stroke-width="1.5"/>
+            <ellipse cx="85" cy="216" rx="14" ry="8" fill="var(--body-fill)" stroke="var(--body)" stroke-width="1.5"/>
             <!-- Thigh -->
-            <line id="thigh" x1="85" y1="216" x2="140" y2="220" stroke="#4a5160" stroke-width="5" stroke-linecap="round"/>
+            <line id="thigh" x1="85" y1="216" x2="140" y2="220" stroke="var(--body)" stroke-width="5" stroke-linecap="round"/>
             <!-- Lower leg -->
-            <line x1="140" y1="220" x2="145" y2="268" stroke="#4a5160" stroke-width="4" stroke-linecap="round"/>
+            <line x1="140" y1="220" x2="145" y2="268" stroke="var(--body)" stroke-width="4" stroke-linecap="round"/>
             <!-- Foot -->
-            <line x1="145" y1="268" x2="162" y2="268" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <line x1="145" y1="268" x2="162" y2="268" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
             <!-- Spine (dynamic) -->
             <path id="spine-path" d="M85,216 Q85,160 85,108" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
             <!-- Hip marker -->
             <ellipse cx="85" cy="216" rx="5" ry="5" fill="#00e5a0" opacity="0.8"/>
             <!-- Shoulder -->
-            <circle id="shoulder" cx="85" cy="108" r="5" fill="#4a5160"/>
+            <circle id="shoulder" cx="85" cy="108" r="5" fill="var(--body)"/>
             <!-- Upper arm -->
-            <line id="upper-arm" x1="85" y1="108" x2="105" y2="150" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <line id="upper-arm" x1="85" y1="108" x2="105" y2="150" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
             <!-- Forearm (reaches to desk/keyboard) -->
-            <line id="forearm" x1="105" y1="150" x2="160" y2="180" stroke="#4a5160" stroke-width="2.5" stroke-linecap="round"/>
+            <line id="forearm" x1="105" y1="150" x2="160" y2="180" stroke="var(--body)" stroke-width="2.5" stroke-linecap="round"/>
             <!-- Hand -->
-            <circle id="hand" cx="160" cy="180" r="3" fill="#4a5160"/>
+            <circle id="hand" cx="160" cy="180" r="3" fill="var(--body)"/>
             <!-- Neck -->
-            <line id="neck" x1="85" y1="108" x2="85" y2="90" stroke="#4a5160" stroke-width="3" stroke-linecap="round"/>
+            <line id="neck" x1="85" y1="108" x2="85" y2="90" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
             <!-- Head -->
-            <circle id="head" cx="85" cy="76" r="16" fill="#1a1d24" stroke="#4a5160" stroke-width="1.5" style="cursor:grab;"/>
+            <circle id="head" cx="85" cy="76" r="16" fill="var(--chair)" stroke="var(--body)" stroke-width="1.5" style="cursor:grab;"/>
             <circle id="head-hitarea" cx="85" cy="76" r="26" fill="transparent" style="cursor:grab;"/>
             <!-- Face -->
-            <line id="nose" x1="87" y1="74" x2="100" y2="80" stroke="#4a5160" stroke-width="1.5" stroke-linecap="round"/>
-            <circle id="eye" cx="92" cy="71" r="2" fill="#4a5160"/>
+            <line id="nose" x1="87" y1="74" x2="100" y2="80" stroke="var(--body)" stroke-width="1.5" stroke-linecap="round"/>
+            <circle id="eye" cx="92" cy="71" r="2" fill="var(--body)"/>
             <!-- Angle arc -->
             <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
             <text id="angle-arc-label" x="60" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
@@ -516,7 +530,25 @@ function applyLang(){
 function setLang(lang){
   currentLang=lang;
   applyLang();
-  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled,lang:currentLang}));
+  savePrefs();
+}
+
+let currentTheme='dark';
+
+function toggleTheme(){
+  currentTheme=currentTheme==='dark'?'light':'dark';
+  applyTheme();
+  savePrefs();
+}
+
+function applyTheme(){
+  if(currentTheme==='light'){
+    document.documentElement.setAttribute('data-theme','light');
+    document.getElementById('theme-btn').textContent='☾';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('theme-btn').textContent='☀';
+  }
 }
 
 // ── SensorBridge ──
@@ -688,12 +720,13 @@ const toastEl=document.getElementById('toast');
       const p=JSON.parse(saved);
       if(p.soundEnabled){soundEnabled=true;beepBtn.className='on';}
       if(p.lang&&T[p.lang]){currentLang=p.lang;}
+      if(p.theme==='light'){currentTheme='light';}
     }catch(e){}
   }
 })();
 
 function savePrefs(){
-  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled,lang:currentLang}));
+  localStorage.setItem('postureguard-prefs',JSON.stringify({soundEnabled,lang:currentLang,theme:currentTheme}));
 }
 
 function showToast(msg){
@@ -1067,6 +1100,7 @@ document.addEventListener('mouseup',onDragEnd);
 document.addEventListener('touchend',onDragEnd);
 
 // Init
+applyTheme();
 applyLang();
 SensorBridge._updateIndicator();
 SensorBridge.pushAngle(0);
