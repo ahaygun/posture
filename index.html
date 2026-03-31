@@ -131,6 +131,50 @@
   .footer-shortcuts { display:flex; gap:14px; align-items:center; }
   .footer-shortcuts kbd { background:var(--border); color:var(--text); padding:1px 6px; border-radius:3px; font-family:'Space Mono',monospace; font-size:.54rem; }
 
+  /* ── View system ── */
+  .view { display:none; }
+  body[data-view="landing"] #view-landing { display:flex; }
+  body[data-view="source"] #view-source { display:flex; }
+  body[data-view="simulation"] #view-simulation { display:block; }
+  body:not([data-view="simulation"]) .source-indicator,
+  body:not([data-view="simulation"]) .header-badge { display:none; }
+  body:not([data-view="simulation"]) .footer-shortcuts { display:none; }
+
+  /* ── Nav back button ── */
+  .nav-back { font-size:.7rem; background:none; border:1px solid var(--border); color:var(--text-dim); padding:5px 12px; border-radius:8px; cursor:pointer; font-family:'Space Mono',monospace; }
+  .nav-back:hover { color:var(--text); border-color:var(--text-dim); }
+  body[data-view="landing"] .nav-back { display:none; }
+
+  /* ── Landing page ── */
+  #view-landing { flex-direction:column; align-items:center; justify-content:center; padding:60px 28px; max-width:900px; margin:0 auto; width:100%; text-align:center; gap:48px; min-height:calc(100vh - 100px); }
+  .landing-hero h1 { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; margin-bottom:12px; }
+  .landing-hero h1 span { color:var(--good); }
+  .landing-hero p { font-size:.78rem; color:var(--text-dim); max-width:520px; margin:0 auto; line-height:1.8; }
+  .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; width:100%; }
+  .feature-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:24px 20px; text-align:left; }
+  .feature-card .feat-icon { font-size:1.6rem; margin-bottom:12px; }
+  .feature-card h3 { font-family:'Syne',sans-serif; font-size:.85rem; font-weight:700; margin-bottom:8px; }
+  .feature-card p { font-size:.62rem; color:var(--text-dim); line-height:1.7; }
+  .hardware-info { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:28px; text-align:left; width:100%; }
+  .hardware-info h3 { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; margin-bottom:10px; color:var(--accent); }
+  .hardware-info p { font-size:.62rem; color:var(--text-dim); line-height:1.8; }
+  .cta-btn { font-family:'Syne',sans-serif; font-weight:700; font-size:.9rem; padding:14px 36px; border-radius:10px; border:none; background:var(--good); color:#0a0c10; cursor:pointer; transition:all .2s; letter-spacing:.03em; }
+  .cta-btn:hover { opacity:.85; transform:translateY(-1px); }
+
+  /* ── Source selection ── */
+  #view-source { flex-direction:column; align-items:center; padding:60px 28px; max-width:700px; margin:0 auto; width:100%; gap:32px; min-height:calc(100vh - 100px); }
+  #view-source h2 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; }
+  .source-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; width:100%; }
+  .source-card { background:var(--panel); border:2px solid var(--border); border-radius:12px; padding:22px; cursor:pointer; transition:all .2s; position:relative; }
+  .source-card:hover:not(.disabled) { border-color:var(--text-dim); }
+  .source-card.selected { border-color:var(--good); box-shadow:0 0 20px rgba(0,229,160,.15); }
+  .source-card.disabled { opacity:.45; cursor:not-allowed; }
+  .source-card .sc-icon { font-size:1.4rem; margin-bottom:10px; }
+  .source-card h4 { font-family:'Syne',sans-serif; font-size:.8rem; font-weight:700; margin-bottom:6px; }
+  .source-card p { font-size:.58rem; color:var(--text-dim); line-height:1.6; }
+  .coming-badge { position:absolute; top:10px; right:10px; font-size:.48rem; font-weight:700; letter-spacing:.08em; color:var(--warn); border:1px solid var(--warn); padding:2px 8px; border-radius:10px; text-transform:uppercase; }
+  .source-actions { display:flex; gap:12px; align-items:center; }
+
   @media (max-width: 768px) {
     header { padding:12px 16px; gap:10px; }
     .header-badge { font-size:.5rem; padding:2px 8px; }
@@ -147,6 +191,10 @@
     .angle-display { font-size:2.2rem; }
     footer { flex-direction:column; gap:8px; text-align:center; }
     .shortcuts-hint { display:none; }
+    .feature-grid { grid-template-columns:1fr; }
+    .source-grid { grid-template-columns:1fr; }
+    .landing-hero h1 { font-size:2rem; }
+    #view-landing, #view-source { padding:40px 16px; }
   }
 
   @media (max-width: 420px) {
@@ -158,6 +206,7 @@
 <body>
 
 <header>
+  <button class="nav-back" onclick="navigateTo('landing')">← </button>
   <div class="logo-dot" id="live-dot"></div>
   <div class="logo-text">Posture<span>Sim</span></div>
   <div class="lang-switcher">
@@ -172,187 +221,251 @@
   <div class="header-badge">SIM v2.0 — MPU6050 EMULATOR</div>
 </header>
 
-<main>
-  <div class="panel spine-panel">
-    <div class="panel-label" data-i18n="panelProfile">Yan Profil — Durus Simülasyonu</div>
-    <div class="figure-wrap">
-      <div class="svg-area">
-        <svg width="280" height="300" viewBox="0 0 280 300" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M20 0L0 0 0 20" fill="none" stroke="var(--grid-line)" stroke-width="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="280" height="300" fill="url(#grid)" opacity="0.6"/>
-          <line x1="85" y1="10" x2="85" y2="290" stroke="var(--grid-line)" stroke-width="1" stroke-dasharray="5,5"/>
-          <text x="88" y="22" fill="var(--text-dim)" font-size="8" font-family="Space Mono" opacity="0.6">PLUMB</text>
-          <!-- Ground -->
-          <line x1="10" y1="272" x2="270" y2="272" stroke="var(--grid-line)" stroke-width="1.5"/>
-          <!-- Desk -->
-          <rect x="155" y="182" width="90" height="6" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
-          <line x1="165" y1="188" x2="165" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
-          <line x1="235" y1="188" x2="235" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
-          <!-- Monitor -->
-          <rect x="183" y="120" width="48" height="36" rx="3" fill="var(--monitor-bg)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
-          <rect x="186" y="123" width="42" height="30" rx="1" fill="var(--monitor-inner)" stroke="var(--grid-line)" stroke-width="0.5"/>
-          <line x1="207" y1="156" x2="207" y2="168" stroke="var(--chair-stroke)" stroke-width="2"/>
-          <rect x="197" y="168" width="20" height="3" rx="1" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1"/>
-          <!-- Monitor stand base on desk -->
-          <rect x="193" y="171" width="28" height="11" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
-          <!-- Keyboard on desk -->
-          <rect x="170" y="176" width="22" height="5" rx="1.5" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
-          <!-- Office Chair -->
-          <!-- Seat cushion -->
-          <rect x="55" y="218" width="75" height="8" rx="4" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
-          <!-- Backrest (behind person, on left) -->
-          <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair-stroke)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair)" stroke-width="3" stroke-linecap="round"/>
-          <!-- Chair cylinder -->
-          <line x1="92" y1="226" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
-          <!-- Chair base (5-star) -->
-          <line x1="68" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="116" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- Casters -->
-          <circle cx="68" cy="271" r="3" fill="var(--chair-stroke)"/>
-          <circle cx="116" cy="271" r="3" fill="var(--chair-stroke)"/>
-          <!-- Person -->
-          <g id="person-group">
-            <!-- Hip/pelvis -->
-            <ellipse cx="85" cy="216" rx="14" ry="8" fill="var(--body-fill)" stroke="var(--body)" stroke-width="1.5"/>
-            <!-- Thigh -->
-            <line id="thigh" x1="85" y1="216" x2="140" y2="220" stroke="var(--body)" stroke-width="5" stroke-linecap="round"/>
-            <!-- Lower leg -->
-            <line x1="140" y1="220" x2="145" y2="268" stroke="var(--body)" stroke-width="4" stroke-linecap="round"/>
-            <!-- Foot -->
-            <line x1="145" y1="268" x2="162" y2="268" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
-            <!-- Spine (dynamic) -->
-            <path id="spine-path" d="M85,216 Q85,160 85,108" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
-            <!-- Hip marker -->
-            <ellipse cx="85" cy="216" rx="5" ry="5" fill="#00e5a0" opacity="0.8"/>
-            <!-- Shoulder -->
-            <circle id="shoulder" cx="85" cy="108" r="5" fill="var(--body)"/>
-            <!-- Upper arm -->
-            <line id="upper-arm" x1="85" y1="108" x2="105" y2="150" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
-            <!-- Forearm (reaches to desk/keyboard) -->
-            <line id="forearm" x1="105" y1="150" x2="160" y2="180" stroke="var(--body)" stroke-width="2.5" stroke-linecap="round"/>
-            <!-- Hand -->
-            <circle id="hand" cx="160" cy="180" r="3" fill="var(--body)"/>
-            <!-- Neck -->
-            <line id="neck" x1="85" y1="108" x2="85" y2="90" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
-            <!-- Head -->
-            <circle id="head" cx="85" cy="76" r="16" fill="var(--chair)" stroke="var(--body)" stroke-width="1.5" style="cursor:grab;"/>
-            <circle id="head-hitarea" cx="85" cy="76" r="26" fill="transparent" style="cursor:grab;"/>
-            <!-- Face -->
-            <line id="nose" x1="87" y1="74" x2="100" y2="80" stroke="var(--body)" stroke-width="1.5" stroke-linecap="round"/>
-            <circle id="eye" cx="92" cy="71" r="2" fill="var(--body)"/>
-            <!-- Angle arc -->
-            <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
-            <text id="angle-arc-label" x="60" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
-          </g>
-          <!-- Sensor marker on spine -->
-          <g id="sensor-marker" transform="translate(85,148)">
-            <rect x="-8" y="-5" width="16" height="10" rx="2" fill="none" stroke="#4f8eff" stroke-width="1" stroke-dasharray="2,2"/>
-            <text x="10" y="4" fill="#4f8eff" font-size="7" font-family="Space Mono">MPU</text>
-          </g>
-        </svg>
-      </div>
+<section id="view-landing" class="view">
+  <div class="landing-hero">
+    <h1>Posture<span>Sim</span></h1>
+    <p data-i18n="landingDesc">MPU6050 sensör verisini kullanarak gerçek zamanlı duruş analizi yapan simülasyon ortamı. Gövde eğilme açısını görselleştirin, uyarı alın ve oturum verilerinizi analiz edin.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feat-icon">🦴</div>
+      <h3 data-i18n="featVizTitle">Gerçek Zamanlı Görselleştirme</h3>
+      <p data-i18n="featVizDesc">Omurga eğilmesini interaktif SVG figür ile canlı takip edin. Kafadan sürükleyerek veya kaydırıcı ile açı kontrolü.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📡</div>
+      <h3 data-i18n="featSensorTitle">Çoklu Veri Kaynağı</h3>
+      <p data-i18n="featSensorDesc">Manuel simülasyon, WebSocket, Seri Port veya Bluetooth üzerinden sensör verisi alabilme altyapısı.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📊</div>
+      <h3 data-i18n="featAnalyticsTitle">Oturum Analizi</h3>
+      <p data-i18n="featAnalyticsDesc">Duruş geçmişi, puan hesaplama, uyarı sistemi ve oturum raporunu dışa aktarma.</p>
+    </div>
+  </div>
+  <div class="hardware-info">
+    <h3 data-i18n="hwTitle">Donanım Konsepti</h3>
+    <p data-i18n="hwDesc">MPU6050 ivmeölçer/jiroskop sensörü sırt üst bölgesine yerleştirilir. Sensör, gövde eğilme açısını ölçer ve mikrodenetleyici (ESP32/Arduino) üzerinden veriyi bu arayüze iletir. Bu simülatör, donanım hazır olmadan görselleştirme katmanını geliştirmenizi ve test etmenizi sağlar.</p>
+  </div>
+  <button class="cta-btn" onclick="navigateTo('source')" data-i18n="ctaBtn">Simülasyona Geç →</button>
+</section>
 
-      <div class="controls-area">
-        <div>
-          <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.12em; margin-bottom:6px;" data-i18n="trunkAngle">GÖVDE EĞİLME AÇISI</div>
-          <div class="angle-display" id="angle-display">0<span class="angle-unit">°</span></div>
-          <div class="posture-label" id="posture-label" style="color:var(--good)" data-i18n="idealPosture">✓ İDEAL DURUŞ</div>
+<section id="view-source" class="view">
+  <h2 data-i18n="sourceTitle">Veri Kaynağı Seçin</h2>
+  <div class="source-grid">
+    <div class="source-card selected" data-source="simulator" onclick="selectSource('simulator')">
+      <div class="sc-icon">🎛️</div>
+      <h4 data-i18n="srcManualTitle">Manuel Simülasyon</h4>
+      <p data-i18n="srcManualDesc">Kaydırıcı, sürükleme ve otomatik simülasyon ile açı kontrolü.</p>
+    </div>
+    <div class="source-card disabled" data-source="websocket">
+      <span class="coming-badge" data-i18n="comingSoon">YAKINDA</span>
+      <div class="sc-icon">📶</div>
+      <h4 data-i18n="srcWSTitle">WebSocket (WiFi)</h4>
+      <p data-i18n="srcWSDesc">ESP32 üzerinden WiFi ile kablosuz veri aktarımı.</p>
+    </div>
+    <div class="source-card disabled" data-source="serial">
+      <span class="coming-badge" data-i18n="comingSoon">YAKINDA</span>
+      <div class="sc-icon">🔌</div>
+      <h4 data-i18n="srcSerialTitle">Seri Port (USB)</h4>
+      <p data-i18n="srcSerialDesc">USB üzerinden doğrudan mikrodenetleyici bağlantısı.</p>
+    </div>
+    <div class="source-card disabled" data-source="bluetooth">
+      <span class="coming-badge" data-i18n="comingSoon">YAKINDA</span>
+      <div class="sc-icon">📲</div>
+      <h4 data-i18n="srcBLETitle">Bluetooth (BLE)</h4>
+      <p data-i18n="srcBLEDesc">Bluetooth Low Energy ile kablosuz sensör bağlantısı.</p>
+    </div>
+  </div>
+  <div class="source-actions">
+    <button class="btn btn-ghost" onclick="navigateTo('landing')" data-i18n="backBtn">← Geri</button>
+    <button class="cta-btn" onclick="startWithSource()" data-i18n="startSimBtn">Simülasyonu Başlat →</button>
+  </div>
+</section>
+
+<section id="view-simulation" class="view">
+  <main>
+    <div class="panel spine-panel">
+      <div class="panel-label" data-i18n="panelProfile">Yan Profil — Durus Simülasyonu</div>
+      <div class="figure-wrap">
+        <div class="svg-area">
+          <svg width="280" height="300" viewBox="0 0 280 300" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M20 0L0 0 0 20" fill="none" stroke="var(--grid-line)" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="280" height="300" fill="url(#grid)" opacity="0.6"/>
+            <line x1="85" y1="10" x2="85" y2="290" stroke="var(--grid-line)" stroke-width="1" stroke-dasharray="5,5"/>
+            <text x="88" y="22" fill="var(--text-dim)" font-size="8" font-family="Space Mono" opacity="0.6">PLUMB</text>
+            <!-- Ground -->
+            <line x1="10" y1="272" x2="270" y2="272" stroke="var(--grid-line)" stroke-width="1.5"/>
+            <!-- Desk -->
+            <rect x="155" y="182" width="90" height="6" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
+            <line x1="165" y1="188" x2="165" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
+            <line x1="235" y1="188" x2="235" y2="270" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
+            <!-- Monitor -->
+            <rect x="183" y="120" width="48" height="36" rx="3" fill="var(--monitor-bg)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
+            <rect x="186" y="123" width="42" height="30" rx="1" fill="var(--monitor-inner)" stroke="var(--grid-line)" stroke-width="0.5"/>
+            <line x1="207" y1="156" x2="207" y2="168" stroke="var(--chair-stroke)" stroke-width="2"/>
+            <rect x="197" y="168" width="20" height="3" rx="1" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1"/>
+            <!-- Monitor stand base on desk -->
+            <rect x="193" y="171" width="28" height="11" rx="2" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
+            <!-- Keyboard on desk -->
+            <rect x="170" y="176" width="22" height="5" rx="1.5" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="0.8"/>
+            <!-- Office Chair -->
+            <!-- Seat cushion -->
+            <rect x="55" y="218" width="75" height="8" rx="4" fill="var(--chair)" stroke="var(--chair-stroke)" stroke-width="1.5"/>
+            <!-- Backrest (behind person, on left) -->
+            <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair-stroke)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M58,218 Q48,190 52,148" fill="none" stroke="var(--chair)" stroke-width="3" stroke-linecap="round"/>
+            <!-- Chair cylinder -->
+            <line x1="92" y1="226" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="3" stroke-linecap="round"/>
+            <!-- Chair base (5-star) -->
+            <line x1="68" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="116" y1="270" x2="92" y2="252" stroke="var(--chair-stroke)" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Casters -->
+            <circle cx="68" cy="271" r="3" fill="var(--chair-stroke)"/>
+            <circle cx="116" cy="271" r="3" fill="var(--chair-stroke)"/>
+            <!-- Person -->
+            <g id="person-group">
+              <!-- Hip/pelvis -->
+              <ellipse cx="85" cy="216" rx="14" ry="8" fill="var(--body-fill)" stroke="var(--body)" stroke-width="1.5"/>
+              <!-- Thigh -->
+              <line id="thigh" x1="85" y1="216" x2="140" y2="220" stroke="var(--body)" stroke-width="5" stroke-linecap="round"/>
+              <!-- Lower leg -->
+              <line x1="140" y1="220" x2="145" y2="268" stroke="var(--body)" stroke-width="4" stroke-linecap="round"/>
+              <!-- Foot -->
+              <line x1="145" y1="268" x2="162" y2="268" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Spine (dynamic) -->
+              <path id="spine-path" d="M85,216 Q85,160 85,108" fill="none" stroke="#00e5a0" stroke-width="4" stroke-linecap="round"/>
+              <!-- Hip marker -->
+              <ellipse cx="85" cy="216" rx="5" ry="5" fill="#00e5a0" opacity="0.8"/>
+              <!-- Shoulder -->
+              <circle id="shoulder" cx="85" cy="108" r="5" fill="var(--body)"/>
+              <!-- Upper arm -->
+              <line id="upper-arm" x1="85" y1="108" x2="105" y2="150" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Forearm (reaches to desk/keyboard) -->
+              <line id="forearm" x1="105" y1="150" x2="160" y2="180" stroke="var(--body)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Hand -->
+              <circle id="hand" cx="160" cy="180" r="3" fill="var(--body)"/>
+              <!-- Neck -->
+              <line id="neck" x1="85" y1="108" x2="85" y2="90" stroke="var(--body)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Head -->
+              <circle id="head" cx="85" cy="76" r="16" fill="var(--chair)" stroke="var(--body)" stroke-width="1.5" style="cursor:grab;"/>
+              <circle id="head-hitarea" cx="85" cy="76" r="26" fill="transparent" style="cursor:grab;"/>
+              <!-- Face -->
+              <line id="nose" x1="87" y1="74" x2="100" y2="80" stroke="var(--body)" stroke-width="1.5" stroke-linecap="round"/>
+              <circle id="eye" cx="92" cy="71" r="2" fill="var(--body)"/>
+              <!-- Angle arc -->
+              <path id="angle-arc" d="" fill="rgba(255,59,78,0.08)" stroke="#ff3b4e" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
+              <text id="angle-arc-label" x="60" y="190" fill="#6b7280" font-size="9" font-family="Space Mono" text-anchor="middle" opacity="0">0°</text>
+            </g>
+            <!-- Sensor marker on spine -->
+            <g id="sensor-marker" transform="translate(85,148)">
+              <rect x="-8" y="-5" width="16" height="10" rx="2" fill="none" stroke="#4f8eff" stroke-width="1" stroke-dasharray="2,2"/>
+              <text x="10" y="4" fill="#4f8eff" font-size="7" font-family="Space Mono">MPU</text>
+            </g>
+          </svg>
         </div>
-        <div>
-          <input type="range" id="angle-slider" min="0" max="60" value="0" step="1">
-          <div class="slider-labels">
-            <span data-i18n="sliderIdeal">0° İdeal</span><span data-i18n="sliderWarn">20° Uyarı</span><span data-i18n="sliderBad">40°+ Kötü</span>
+
+        <div class="controls-area">
+          <div>
+            <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.12em; margin-bottom:6px;" data-i18n="trunkAngle">GÖVDE EĞİLME AÇISI</div>
+            <div class="angle-display" id="angle-display">0<span class="angle-unit">°</span></div>
+            <div class="posture-label" id="posture-label" style="color:var(--good)" data-i18n="idealPosture">✓ İDEAL DURUŞ</div>
+          </div>
+          <div>
+            <input type="range" id="angle-slider" min="0" max="60" value="0" step="1">
+            <div class="slider-labels">
+              <span data-i18n="sliderIdeal">0° İdeal</span><span data-i18n="sliderWarn">20° Uyarı</span><span data-i18n="sliderBad">40°+ Kötü</span>
+            </div>
+          </div>
+          <div class="angle-guide">
+            <div class="guide-row"><div class="guide-dot" style="background:var(--good)"></div><span data-i18n="guideGood">0° – 20° → Dik, sağlıklı omurga</span></div>
+            <div class="guide-row"><div class="guide-dot" style="background:var(--warn)"></div><span data-i18n="guideWarn">20° – 40° → Hafif öne eğilme</span></div>
+            <div class="guide-row"><div class="guide-dot" style="background:var(--bad)"></div><span data-i18n="guideBad">40°+ → Kamburlaşmış, omurga baskı altında</span></div>
+          </div>
+          <div class="controls-row">
+            <button class="btn btn-primary" id="session-btn" data-i18n="btnStart">▶ Başlat</button>
+            <button class="btn btn-ghost" id="reset-btn" data-i18n="btnReset">↺ Sıfırla</button>
+            <button class="btn btn-auto" id="auto-btn" data-i18n="btnAuto">▷ Oto</button>
+            <button class="btn btn-export" id="export-btn" data-i18n="btnExport">↓ Dışa Aktar</button>
+            <div id="beep-btn"><div class="dot"></div><span data-i18n="sound">Ses</span></div>
           </div>
         </div>
-        <div class="angle-guide">
-          <div class="guide-row"><div class="guide-dot" style="background:var(--good)"></div><span data-i18n="guideGood">0° – 20° → Dik, sağlıklı omurga</span></div>
-          <div class="guide-row"><div class="guide-dot" style="background:var(--warn)"></div><span data-i18n="guideWarn">20° – 40° → Hafif öne eğilme</span></div>
-          <div class="guide-row"><div class="guide-dot" style="background:var(--bad)"></div><span data-i18n="guideBad">40°+ → Kamburlaşmış, omurga baskı altında</span></div>
-        </div>
-        <div class="controls-row">
-          <button class="btn btn-primary" id="session-btn" data-i18n="btnStart">▶ Başlat</button>
-          <button class="btn btn-ghost" id="reset-btn" data-i18n="btnReset">↺ Sıfırla</button>
-          <button class="btn btn-auto" id="auto-btn" data-i18n="btnAuto">▷ Oto</button>
-          <button class="btn btn-export" id="export-btn" data-i18n="btnExport">↓ Dışa Aktar</button>
-          <div id="beep-btn"><div class="dot"></div><span data-i18n="sound">Ses</span></div>
-        </div>
       </div>
     </div>
-  </div>
 
-  <div class="status-panel">
-    <div class="status-card">
-      <div class="panel-label" data-i18n="postureStatus">Duruş Durumu</div>
-      <div class="status-indicator">
-        <div class="status-circle good" id="status-circle">🧍</div>
-        <div class="status-info">
-          <h3 id="status-title" style="color:var(--good)" data-i18n="goodPosture">İyi Duruş</h3>
-          <p id="status-desc" data-i18n="spineAligned">Omurga doğru hizalanmış</p>
+    <div class="status-panel">
+      <div class="status-card">
+        <div class="panel-label" data-i18n="postureStatus">Duruş Durumu</div>
+        <div class="status-indicator">
+          <div class="status-circle good" id="status-circle">🧍</div>
+          <div class="status-info">
+            <h3 id="status-title" style="color:var(--good)" data-i18n="goodPosture">İyi Duruş</h3>
+            <p id="status-desc" data-i18n="spineAligned">Omurga doğru hizalanmış</p>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; margin-bottom:5px;" data-i18n="badPostureTimer">KÖTÜ DURUŞ SAYACI</div>
+          <div class="timer-value inactive" id="bad-timer">0s</div>
+          <div style="font-size:.56rem; color:var(--text-dim); margin:4px 0 7px;" data-i18n="alertThreshold">Uyarı eşiği: 10sn</div>
+          <div class="bad-progress"><div class="bad-progress-fill" id="bad-progress-fill" style="width:0%"></div></div>
         </div>
       </div>
-      <div>
-        <div style="font-size:.58rem; color:var(--text-dim); letter-spacing:.1em; margin-bottom:5px;" data-i18n="badPostureTimer">KÖTÜ DURUŞ SAYACI</div>
-        <div class="timer-value inactive" id="bad-timer">0s</div>
-        <div style="font-size:.56rem; color:var(--text-dim); margin:4px 0 7px;" data-i18n="alertThreshold">Uyarı eşiği: 10sn</div>
-        <div class="bad-progress"><div class="bad-progress-fill" id="bad-progress-fill" style="width:0%"></div></div>
+      <div class="status-card">
+        <div class="panel-label" data-i18n="sessionTimer">Oturum Sayacı</div>
+        <div class="timer-row">
+          <span class="timer-label" data-i18n="elapsed">GEÇEN SÜRE</span>
+          <span class="timer-value inactive" id="session-timer">00:00</span>
+        </div>
+        <div class="timer-row">
+          <span class="timer-label" data-i18n="status">DURUM</span>
+          <span style="font-size:.62rem; color:var(--neutral);" id="session-status-text" data-i18n="idle">BEKLEMEDE</span>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="panel-label" data-i18n="alertLog">Uyarı Günlüğü</div>
+        <div id="alert-log" style="max-height:110px; overflow-y:auto; font-size:.6rem; color:var(--text-dim); line-height:1.9;">
+          <div style="color:var(--neutral); font-style:italic;" data-i18n="noAlerts">Henüz uyarı yok...</div>
+        </div>
       </div>
     </div>
-    <div class="status-card">
-      <div class="panel-label" data-i18n="sessionTimer">Oturum Sayacı</div>
-      <div class="timer-row">
-        <span class="timer-label" data-i18n="elapsed">GEÇEN SÜRE</span>
-        <span class="timer-value inactive" id="session-timer">00:00</span>
-      </div>
-      <div class="timer-row">
-        <span class="timer-label" data-i18n="status">DURUM</span>
-        <span style="font-size:.62rem; color:var(--neutral);" id="session-status-text" data-i18n="idle">BEKLEMEDE</span>
-      </div>
-    </div>
-    <div class="status-card">
-      <div class="panel-label" data-i18n="alertLog">Uyarı Günlüğü</div>
-      <div id="alert-log" style="max-height:110px; overflow-y:auto; font-size:.6rem; color:var(--text-dim); line-height:1.9;">
-        <div style="color:var(--neutral); font-style:italic;" data-i18n="noAlerts">Henüz uyarı yok...</div>
-      </div>
-    </div>
-  </div>
 
-  <div class="panel history-panel">
-    <div class="panel-label" data-i18n="historyTitle">Duruş Geçmişi — Son 60sn</div>
-    <div class="history-track" id="history-track"></div>
-    <div style="display:flex; gap:18px; margin-top:9px; font-size:.56rem; color:var(--text-dim);">
-      <span><span style="color:var(--good)">■</span> <span data-i18n="histGood">İyi (0°–20°)</span></span>
-      <span><span style="color:var(--warn)">■</span> <span data-i18n="histWarn">Uyarı (20°–40°)</span></span>
-      <span><span style="color:var(--bad)">■</span> <span data-i18n="histBad">Kötü (40°+)</span></span>
+    <div class="panel history-panel">
+      <div class="panel-label" data-i18n="historyTitle">Duruş Geçmişi — Son 60sn</div>
+      <div class="history-track" id="history-track"></div>
+      <div style="display:flex; gap:18px; margin-top:9px; font-size:.56rem; color:var(--text-dim);">
+        <span><span style="color:var(--good)">■</span> <span data-i18n="histGood">İyi (0°–20°)</span></span>
+        <span><span style="color:var(--warn)">■</span> <span data-i18n="histWarn">Uyarı (20°–40°)</span></span>
+        <span><span style="color:var(--bad)">■</span> <span data-i18n="histBad">Kötü (40°+)</span></span>
+      </div>
     </div>
-  </div>
 
-  <div class="panel analytics-panel">
-    <div class="panel-label" data-i18n="analytics">Oturum Analizi</div>
-    <div class="stats-grid">
-      <div class="stat-card c-total"><div class="stat-label" data-i18n="statTotal">Toplam Oturum</div><div class="stat-value" id="stat-total">0:00</div></div>
-      <div class="stat-card c-good"><div class="stat-label" data-i18n="statGood">İyi Duruş</div><div class="stat-value" id="stat-good">0:00</div></div>
-      <div class="stat-card c-bad"><div class="stat-label" data-i18n="statBad">Kötü Duruş</div><div class="stat-value" id="stat-bad">0:00</div></div>
-      <div class="stat-card c-pct"><div class="stat-label" data-i18n="statScore">Duruş Puanı</div><div class="stat-value" id="stat-pct">—</div></div>
+    <div class="panel analytics-panel">
+      <div class="panel-label" data-i18n="analytics">Oturum Analizi</div>
+      <div class="stats-grid">
+        <div class="stat-card c-total"><div class="stat-label" data-i18n="statTotal">Toplam Oturum</div><div class="stat-value" id="stat-total">0:00</div></div>
+        <div class="stat-card c-good"><div class="stat-label" data-i18n="statGood">İyi Duruş</div><div class="stat-value" id="stat-good">0:00</div></div>
+        <div class="stat-card c-bad"><div class="stat-label" data-i18n="statBad">Kötü Duruş</div><div class="stat-value" id="stat-bad">0:00</div></div>
+        <div class="stat-card c-pct"><div class="stat-label" data-i18n="statScore">Duruş Puanı</div><div class="stat-value" id="stat-pct">—</div></div>
+      </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<footer>
-  <span data-i18n="footerTitle">Posture Simulation v2.0 — MPU6050 Giyilebilir Emülatör</span>
-  <div class="footer-shortcuts">
-    <span><kbd>Space</kbd> <span data-i18n="fStartStop">Başlat/Durdur</span></span>
-    <span><kbd>R</kbd> <span data-i18n="fReset">Sıfırla</span></span>
-    <span><kbd>A</kbd> <span data-i18n="fAuto">Oto-Sim</span></span>
-    <span><kbd>S</kbd> <span data-i18n="fSound">Ses</span></span>
-    <span><kbd>E</kbd> <span data-i18n="fExport">Dışa Aktar</span></span>
-    <span><kbd>?</kbd> <span data-i18n="fShortcuts">Kısayollar</span></span>
-  </div>
-</footer>
+  <footer>
+    <span data-i18n="footerTitle">Posture Simulation v2.0 — MPU6050 Giyilebilir Emülatör</span>
+    <div class="footer-shortcuts">
+      <span><kbd>Space</kbd> <span data-i18n="fStartStop">Başlat/Durdur</span></span>
+      <span><kbd>R</kbd> <span data-i18n="fReset">Sıfırla</span></span>
+      <span><kbd>A</kbd> <span data-i18n="fAuto">Oto-Sim</span></span>
+      <span><kbd>S</kbd> <span data-i18n="fSound">Ses</span></span>
+      <span><kbd>E</kbd> <span data-i18n="fExport">Dışa Aktar</span></span>
+      <span><kbd>?</kbd> <span data-i18n="fShortcuts">Kısayollar</span></span>
+    </div>
+  </footer>
+</section>
 
 <div id="alert-overlay">
   <div class="alert-box">
@@ -439,7 +552,29 @@ const T={
     reportGenerated:'Posture Simulation v2.0 tarafından oluşturuldu',
     srcSimulator:'SİMÜLATÖR', srcWebSocket:'WEBSOCKET', srcSerial:'SERİ PORT', srcBluetooth:'BLUETOOTH',
     srcConnecting:'BAĞLANIYOR...', srcConnected:'BAĞLI', srcDisconnected:'BAĞLANTI KESİLDİ',
-    toastSrcChanged:'Veri kaynağı değiştirildi'
+    toastSrcChanged:'Veri kaynağı değiştirildi',
+    landingDesc:'MPU6050 sensör verisini kullanarak gerçek zamanlı duruş analizi yapan simülasyon ortamı. Gövde eğilme açısını görselleştirin, uyarı alın ve oturum verilerinizi analiz edin.',
+    featVizTitle:'Gerçek Zamanlı Görselleştirme',
+    featVizDesc:'Omurga eğilmesini interaktif SVG figür ile canlı takip edin. Kafadan sürükleyerek veya kaydırıcı ile açı kontrolü.',
+    featSensorTitle:'Çoklu Veri Kaynağı',
+    featSensorDesc:'Manuel simülasyon, WebSocket, Seri Port veya Bluetooth üzerinden sensör verisi alabilme altyapısı.',
+    featAnalyticsTitle:'Oturum Analizi',
+    featAnalyticsDesc:'Duruş geçmişi, puan hesaplama, uyarı sistemi ve oturum raporunu dışa aktarma.',
+    hwTitle:'Donanım Konsepti',
+    hwDesc:'MPU6050 ivmeölçer/jiroskop sensörü sırt üst bölgesine yerleştirilir. Sensör, gövde eğilme açısını ölçer ve mikrodenetleyici (ESP32/Arduino) üzerinden veriyi bu arayüze iletir. Bu simülatör, donanım hazır olmadan görselleştirme katmanını geliştirmenizi ve test etmenizi sağlar.',
+    ctaBtn:'Simülasyona Geç →',
+    sourceTitle:'Veri Kaynağı Seçin',
+    srcManualTitle:'Manuel Simülasyon',
+    srcManualDesc:'Kaydırıcı, sürükleme ve otomatik simülasyon ile açı kontrolü.',
+    srcWSTitle:'WebSocket (WiFi)',
+    srcWSDesc:'ESP32 üzerinden WiFi ile kablosuz veri aktarımı.',
+    srcSerialTitle:'Seri Port (USB)',
+    srcSerialDesc:'USB üzerinden doğrudan mikrodenetleyici bağlantısı.',
+    srcBLETitle:'Bluetooth (BLE)',
+    srcBLEDesc:'Bluetooth Low Energy ile kablosuz sensör bağlantısı.',
+    comingSoon:'YAKINDA',
+    startSimBtn:'Simülasyonu Başlat →',
+    backBtn:'← Geri'
   },
   en:{
     panelProfile:'Side Profile — Posture Simulation',
@@ -502,7 +637,29 @@ const T={
     reportGenerated:'Generated by Posture Simulation v2.0',
     srcSimulator:'SIMULATOR', srcWebSocket:'WEBSOCKET', srcSerial:'SERIAL', srcBluetooth:'BLUETOOTH',
     srcConnecting:'CONNECTING...', srcConnected:'CONNECTED', srcDisconnected:'DISCONNECTED',
-    toastSrcChanged:'Data source changed'
+    toastSrcChanged:'Data source changed',
+    landingDesc:'Real-time posture analysis simulation using MPU6050 sensor data. Visualize trunk lean angle, receive alerts, and analyze session data.',
+    featVizTitle:'Real-Time Visualization',
+    featVizDesc:'Track spine curvature with an interactive SVG figure. Control angle by dragging the head or using the slider.',
+    featSensorTitle:'Multi-Source Architecture',
+    featSensorDesc:'Receive sensor data via manual simulation, WebSocket, Serial Port, or Bluetooth.',
+    featAnalyticsTitle:'Session Analytics',
+    featAnalyticsDesc:'Posture history, score calculation, alert system, and session report export.',
+    hwTitle:'Hardware Concept',
+    hwDesc:'The MPU6050 accelerometer/gyroscope sensor is placed on the upper back. It measures trunk lean angle and transmits data to this interface via a microcontroller (ESP32/Arduino). This simulator lets you develop and test the visualization layer before the hardware is ready.',
+    ctaBtn:'Go to Simulation →',
+    sourceTitle:'Select Data Source',
+    srcManualTitle:'Manual Simulation',
+    srcManualDesc:'Control angle via slider, drag, and auto-simulation.',
+    srcWSTitle:'WebSocket (WiFi)',
+    srcWSDesc:'Wireless data transfer via ESP32 over WiFi.',
+    srcSerialTitle:'Serial Port (USB)',
+    srcSerialDesc:'Direct microcontroller connection via USB.',
+    srcBLETitle:'Bluetooth (BLE)',
+    srcBLEDesc:'Wireless sensor connection via Bluetooth Low Energy.',
+    comingSoon:'COMING SOON',
+    startSimBtn:'Start Simulation →',
+    backBtn:'← Back'
   }
 };
 
@@ -549,6 +706,30 @@ function applyTheme(){
     document.documentElement.removeAttribute('data-theme');
     document.getElementById('theme-btn').textContent='☀';
   }
+}
+
+// ── Navigation ──
+let currentView='landing';
+
+function navigateTo(view){
+  currentView=view;
+  document.body.setAttribute('data-view',view);
+  window.scrollTo(0,0);
+  applyLang();
+}
+
+let selectedSource='simulator';
+
+function selectSource(type){
+  if(type!=='simulator') return;
+  selectedSource=type;
+  document.querySelectorAll('.source-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelector('.source-card[data-source="'+type+'"]').classList.add('selected');
+}
+
+function startWithSource(){
+  SensorBridge.setSource(selectedSource);
+  navigateTo('simulation');
 }
 
 // ── SensorBridge ──
@@ -1020,6 +1201,12 @@ exportBtn.addEventListener('click',exportReport);
 // Keyboard shortcuts
 document.addEventListener('keydown',(e)=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key==='Escape'){
+    if(currentView==='simulation') navigateTo('source');
+    else if(currentView==='source') navigateTo('landing');
+    return;
+  }
+  if(currentView!=='simulation') return;
   switch(e.key.toLowerCase()){
     case ' ':
       e.preventDefault();
@@ -1105,6 +1292,7 @@ applyLang();
 SensorBridge._updateIndicator();
 SensorBridge.pushAngle(0);
 updateHistory();
+navigateTo('landing');
 </script>
 </body>
 </html>
